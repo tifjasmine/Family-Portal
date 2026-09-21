@@ -51,6 +51,11 @@ body[data-mode="adult"] .person[aria-pressed="true"]{border-color:var(--grape)}
 .dayline{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 2px 16px}
 .dayline h1{margin:0;font-size:clamp(30px,5vw,46px);font-weight:700;line-height:1.05}
 .dayline .sub{color:var(--muted);font-size:18px;font-weight:500}
+.kid-week{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;margin:0 0 18px}
+.kid-day{border:3px solid var(--line);border-radius:18px;background:var(--paper);padding:8px 3px;text-align:center;font-weight:600;color:var(--muted)}
+.kid-day b{display:block;font-size:22px;color:var(--ink)}.kid-day span{display:block;min-height:24px;font-size:18px;white-space:nowrap;overflow:hidden}
+.kid-day[aria-current="true"]{background:var(--grape);border-color:var(--grape);color:#fff;transform:translateY(-2px)}.kid-day[aria-current="true"] b{color:#fff}
+@media(max-width:560px){.kid-week{gap:4px}.kid-day{border-width:2px;border-radius:14px;padding:7px 1px;font-size:11px}.kid-day b{font-size:18px}.kid-day span{font-size:15px}}
 .nav{display:flex;gap:8px}
 .nav button{border:1px solid var(--line);background:var(--paper);border-radius:12px;padding:9px 16px;font-weight:500;font-size:16px}
 
@@ -230,7 +235,7 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
 <script type="application/json" id="fp-data">{"pin":"123","items":[
 {"id":"teeth","title":"Brush teeth","emoji":"🪥","who":["daughter"],"type":"task","repeat":{"kind":"daily"},"slots":["Morning","Evening"]},
 {"id":"dressed","title":"Get dressed","emoji":"👕","who":["daughter"],"type":"task","repeat":{"kind":"daily"},"slots":["Morning"]},
-{"id":"cream","title":"Cream","emoji":"🧴","who":["daughter","mom"],"type":"task","repeat":{"kind":"daily"},"slots":["Morning","Evening"]},
+{"id":"cream","title":"Lotion","emoji":"🧴","who":["daughter","mom"],"type":"task","repeat":{"kind":"daily"},"slots":["Morning","Evening"]},
 {"id":"read","title":"Read a book","emoji":"📚","who":["daughter"],"type":"task","repeat":{"kind":"daily"},"slots":["Afternoon"]},
 {"id":"workbook","title":"Workbook time","emoji":"✏️","who":["daughter"],"type":"task","repeat":{"kind":"daily"},"slots":["Afternoon"]},
 {"id":"outside","title":"Play outside","emoji":"🌳","who":["daughter"],"type":"task","repeat":{"kind":"daily"},"slots":["Afternoon"]},
@@ -239,7 +244,8 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
 {"id":"cook","title":"Cook dinner","emoji":"🍳","who":["mom"],"type":"task","repeat":{"kind":"days","days":[1]},"slots":["Evening"]},
 {"id":"snacks","title":"Pack snacks for snack day","emoji":"🍎","who":["mom"],"type":"task","repeat":{"kind":"date","date":"2026-09-21"},"slots":[]},
 {"id":"school","title":"School","emoji":"🏫","who":["daughter"],"type":"plan","repeat":{"kind":"days","days":[1,2,4]},"slots":["Morning"]},
-{"id":"gigi","title":"Gigi / PopPop pick up","emoji":"👵🏽👴🏽🚗","who":["daughter"],"type":"plan","repeat":{"kind":"days","days":[1,2,4]},"slots":["Afternoon"]}
+{"id":"gigi","title":"Gigi / PopPop pick up","emoji":"👵🏽👴🏽🚗","who":["daughter"],"type":"plan","repeat":{"kind":"days","days":[1,2,4]},"slots":["Afternoon"]},
+{"id":"dentist-2026-09-23","title":"Dentist appointment","emoji":"🦷","who":["daughter"],"type":"plan","repeat":{"kind":"date","date":"2026-09-23"},"slots":["Afternoon"]}
 ]}</script>
 <script>
 (function(){
@@ -292,7 +298,7 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
   function iso(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())}
   function dayAt(off){var d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+off);return d}
   function viewDate(){return dayAt(offset)}
-  var friendlyVoice=null;
+  var friendlyVoice=null, currentAudio=null;
   function getFriendlyVoice(){
     if(friendlyVoice)return friendlyVoice;
     var voices=(window.speechSynthesis&&speechSynthesis.getVoices?speechSynthesis.getVoices():[])||[];
@@ -308,6 +314,15 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
       if(v)u.voice=v;u.rate=.76;u.pitch=1.08;u.volume=1;
       speechSynthesis.cancel();speechSynthesis.speak(u);
     }catch(e){}
+  }
+  function playClip(path,fallback){
+    try{
+      if(currentAudio){currentAudio.pause();currentAudio.currentTime=0}
+      if(window.speechSynthesis)speechSynthesis.cancel();
+      currentAudio=new Audio(path);
+      currentAudio.onerror=function(){if(fallback)say(fallback)};
+      var p=currentAudio.play();if(p&&p.catch)p.catch(function(){if(fallback)say(fallback)});
+    }catch(e){if(fallback)say(fallback)}
   }
   if(window.speechSynthesis)speechSynthesis.addEventListener("voiceschanged",function(){friendlyVoice=null;getFriendlyVoice()});
   function dayNumber(d){return Math.floor(new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime()/86400000)}
@@ -384,6 +399,13 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
     var y=dayAt(-1), t=dayAt(1);
 
     h+='<div class="dayline"><div><h1>Hi Kaiya!</h1><div class="sub">'+DOWLONG[d.getDay()]+', '+MONTHS[d.getMonth()]+' '+d.getDate()+'</div></div></div>';
+    var weekStart=new Date(d);weekStart.setDate(d.getDate()-d.getDay());
+    h+='<div class="kid-week" aria-label="Choose a day this week">';
+    for(var wi=0;wi<7;wi++){
+      var wd=new Date(weekStart);wd.setDate(weekStart.getDate()+wi);var woff=Math.round((wd-dayAt(0))/864e5),wplans=plans("daughter",wd);
+      h+='<button class="kid-day" data-goto="'+woff+'" aria-current="'+(iso(wd)===iso(d))+'">'+DOW[wi]+'<b>'+wd.getDate()+'</b><span>'+wplans.map(function(x){return x.it.emoji}).join('')+'</span></button>';
+    }
+    h+='</div>';
 
     // check-in (collapses once it is finished)
     var complete=!!(emo&&c.day!=null), showFull=!complete||ciEdit, ci="";
@@ -430,9 +452,9 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
       +'<button class="letter-launch" data-letter-toggle="1" aria-expanded="'+lessonOpen+'"><span class="letter-badge">'+letter[0]+'<small>'+letter[0].toLowerCase()+'</small></span><span><strong>'+letter[0]+' '+letter[0].toLowerCase()+' is for '+letter[1]+'</strong><small>Tap for a mini lesson!</small></span></button>';
     if(lessonOpen){
       h+='<div class="lesson"><div class="lesson-word"><span class="big">'+letter[2]+'</span>'+letter[0]+' '+letter[0].toLowerCase()+' is for '+letter[1]+'</div>'
-        +'<p>'+esc(phonicsLine(letter))+'</p><button class="sound-btn" data-say="'+esc(phonicsLine(letter)+' '+letterQuestion(letter))+'">🔊 Hear the lesson</button>'
-        +'<div class="letter-game"><p>'+esc(letterQuestion(letter))+' <button class="mini-say" data-say="'+esc(letterQuestion(letter))+'" aria-label="Hear the question">🔊</button></p><div class="letter-choices">';
-      choices.forEach(function(ch){var picked=letterPick===ch[0],right=letterSubmitted&&picked&&ch[0]===letter[0],wrong=letterSubmitted&&picked&&ch[0]!==letter[0];h+='<button class="letter-choice'+(picked?" selected":"")+(right?" right":"")+(wrong?" wrong":"")+'" data-letter-choice="'+ch[0]+'" aria-pressed="'+picked+'" aria-label="'+esc(ch[1])+'">'+ch[2]+'</button>'});
+        +'<p>'+esc(phonicsLine(letter))+'</p><button class="sound-btn" data-audio="audio/lessons/'+letter[0].toLowerCase()+'.wav" data-fallback="'+esc(phonicsLine(letter)+' '+letterQuestion(letter))+'">🔊 Hear the lesson</button>'
+        +'<div class="letter-game"><p>'+esc(letterQuestion(letter))+' <button class="mini-say" data-audio="audio/questions/'+letter[0].toLowerCase()+'.wav" data-fallback="'+esc(letterQuestion(letter))+'" aria-label="Hear the question">🔊</button></p><div class="letter-choices">';
+      choices.forEach(function(ch){var picked=letterPick===ch[0],right=letterSubmitted&&picked&&ch[0]===letter[0],wrong=letterSubmitted&&picked&&ch[0]!==letter[0];h+='<button class="letter-choice'+(picked?" selected":"")+(right?" right":"")+(wrong?" wrong":"")+'" data-letter-choice="'+ch[0]+'" data-audio="audio/words/'+ch[0].toLowerCase()+'.wav" data-fallback="'+esc(ch[1])+'." aria-pressed="'+picked+'" aria-label="'+esc(ch[1])+'">'+ch[2]+'</button>'});
       h+='</div><button class="letter-submit" data-letter-submit="1"'+(letterPick?'':' disabled')+'>Submit answer</button><div class="letter-feedback" aria-live="polite">'+(letterSubmitted?(letterPick===letter[0]?"🎉 Yes! "+letter[1]+" starts with "+letter[0]+"!":"Almost—listen again and choose another picture!"):(letterPick?"You picked "+LETTERS.filter(function(x){return x[0]===letterPick})[0][1]+". Press submit when you’re ready!":"Tap each picture to hear its name."))+'</div></div></div>';
     }
     h+='</section><section class="fun-card"><div class="fun-head"><h2>💪 Morning workout</h2><span>'+moveCount+'/3</span></div><div class="workout-list">';
@@ -565,7 +587,6 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
   function render(){
     if(!unlocked){renderLock();return}
     var d=viewDate(), kid=(who==="daughter");
-    if(kid&&offset!==0){offset=0;d=viewDate()}
     document.body.setAttribute("data-mode",kid?"kid":"adult");
     var h='<div class="top"><div class="people">';
     PEOPLE.forEach(function(p){h+='<button class="person" data-who="'+p.id+'" aria-pressed="'+(p.id===who)+'"><span class="face">'+avatar(p.id,kid?60:36)+'</span>'+p.name+'</button>'});
@@ -677,6 +698,8 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
     if(pk&&!unlocked){pinKey(pk.getAttribute("data-pin"));return}
     var sy=t.closest("[data-say]");
     if(sy){ev.stopPropagation();say(sy.getAttribute("data-say"));return}
+    var au=t.closest("[data-audio]");
+    if(au&&!au.hasAttribute("data-letter-choice")){ev.stopPropagation();playClip(au.getAttribute("data-audio"),au.getAttribute("data-fallback"));return}
     var p=t.closest("[data-who]");
     if(p){who=p.getAttribute("data-who");save("fp-who",who);offset=0;ciEdit=false;render();window.scrollTo(0,0);return}
     var nv=t.closest("[data-nav]");
@@ -686,11 +709,11 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
     var ce=t.closest("[data-ciedit]");
     if(ce){ciEdit=ce.getAttribute("data-ciedit")==="1";render();return}
     var lt=t.closest("[data-letter-toggle]");
-    if(lt&&!sheetOpen){lessonOpen=!lessonOpen;letterPick="";letterSubmitted=false;render();if(lessonOpen){var openLetter=dailyLetter(viewDate());say(phonicsLine(openLetter)+" "+letterQuestion(openLetter))}return}
+    if(lt&&!sheetOpen){lessonOpen=!lessonOpen;letterPick="";letterSubmitted=false;render();if(lessonOpen){var openLetter=dailyLetter(viewDate());playClip("audio/lessons/"+openLetter[0].toLowerCase()+".wav",phonicsLine(openLetter)+" "+letterQuestion(openLetter))}return}
     var lc=t.closest("[data-letter-choice]");
-    if(lc&&!sheetOpen){letterPick=lc.getAttribute("data-letter-choice");letterSubmitted=false;var pickedLetter=LETTERS.filter(function(x){return x[0]===letterPick})[0];say(pickedLetter[1]+".");render();return}
+    if(lc&&!sheetOpen){letterPick=lc.getAttribute("data-letter-choice");letterSubmitted=false;var pickedLetter=LETTERS.filter(function(x){return x[0]===letterPick})[0];playClip(lc.getAttribute("data-audio"),pickedLetter[1]+".");render();return}
     var ls=t.closest("[data-letter-submit]");
-    if(ls&&!sheetOpen){var dl=dailyLetter(viewDate());if(!letterPick){say("Choose a picture first.");return}letterSubmitted=true;say(letterPick===dl[0]?"Yes! "+dl[1]+" starts with the letter "+dl[0]+". Great listening!":"Almost. Listen to the letter sound, and try another picture.");render();return}
+    if(ls&&!sheetOpen){var dl=dailyLetter(viewDate());if(!letterPick){playClip("audio/feedback/choose.wav","Choose a picture first.");return}letterSubmitted=true;playClip(letterPick===dl[0]?"audio/feedback/correct.wav":"audio/feedback/again.wav",letterPick===dl[0]?"Yes! Great listening!":"Almost. Listen again, and try another picture.");render();return}
     var wo=t.closest("[data-workout]");
     if(wo&&!sheetOpen){var wk2=wo.getAttribute("data-workout");if(workoutDone[wk2])delete workoutDone[wk2];else workoutDone[wk2]=1;save("fp-workout",workoutDone);render();return}
     var em=t.closest("[data-emo]");
@@ -763,11 +786,20 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
   });
 
   var lastDay=iso(new Date());
-  function tick(){var dn=iso(new Date());if(dn!==lastDay){lastDay=dn;if(offset===0&&!sheetOpen)render()}}
+  var lastSync=0;
+  function syncAirtable(force){
+    if(!force&&Date.now()-lastSync<30000)return Promise.resolve();
+    lastSync=Date.now();
+    return fetch("/.netlify/functions/family-data",{cache:"no-store"}).then(function(r){if(!r.ok)throw new Error("sync unavailable");return r.json()}).then(function(data){
+      if(data.items&&data.items.length){state.items=data.items;local.edit={};local.del=[];save("fp-local",local);if(!sheetOpen)render()}
+    }).catch(function(){});
+  }
+  function tick(){var dn=iso(new Date());if(dn!==lastDay){lastDay=dn;if(offset===0&&!sheetOpen)render()}syncAirtable(false)}
   setInterval(tick,60000);
-  document.addEventListener("visibilitychange",function(){if(!document.hidden)tick()});
+  document.addEventListener("visibilitychange",function(){if(!document.hidden){tick();syncAirtable(true)}});
 
   render();
+  syncAirtable(true);
 
 })();
 </script>
