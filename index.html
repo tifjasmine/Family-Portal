@@ -134,7 +134,8 @@ body[data-mode="adult"] .person[aria-pressed="true"]{border-color:var(--grape)}
 .fun-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
 .fun-head h2{margin:0;font-size:24px}
 .letter-launch{width:100%;border:4px solid var(--grape);border-radius:24px;background:var(--bg);padding:14px;display:flex;align-items:center;gap:16px;text-align:left}
-.letter-badge{display:grid;place-items:center;flex:0 0 auto;width:90px;height:90px;border-radius:24px;background:var(--grape);color:#fff;font-size:58px;font-weight:700}
+.letter-badge{display:flex;align-items:baseline;justify-content:center;gap:3px;flex:0 0 auto;width:100px;height:90px;border-radius:24px;background:var(--grape);color:#fff;font-size:55px;font-weight:700}
+.letter-badge small{font-size:37px;color:#fff}
 .letter-launch strong{display:block;font-size:25px}.letter-launch small{display:block;color:var(--muted);font-size:17px;margin-top:3px}
 .lesson{margin-top:12px;border:3px dashed var(--line);border-radius:22px;padding:14px;text-align:center}
 .lesson-word{font-size:29px;font-weight:600;margin:4px 0 10px}.lesson-word .big{font-size:55px;display:block}
@@ -246,6 +247,15 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
   var LETTERS=[
     ["A","apple","🍎","short a, ah"],["B","ball","⚽","buh"],["C","cat","🐱","kuh"],["D","dog","🐶","duh"],["E","egg","🥚","short e, eh"],["F","fish","🐟","fff"],["G","goat","🐐","guh"],["H","hat","🎩","huh"],["I","igloo","🧊","short i, ih"],["J","jellyfish","🪼","juh"],["K","kite","🪁","kuh"],["L","lion","🦁","lll"],["M","moon","🌙","mmm"],["N","nest","🪺","nnn"],["O","octopus","🐙","short o, ah"],["P","pig","🐷","puh"],["Q","queen","👑","kwuh"],["R","rainbow","🌈","rrr"],["S","sun","☀️","sss"],["T","turtle","🐢","tuh"],["U","umbrella","☂️","short u, uh"],["V","violin","🎻","vvv"],["W","whale","🐋","wuh"],["X","xylophone","🎼","ks"],["Y","yo-yo","🪀","yuh"],["Z","zebra","🦓","zzz"]
   ];
+  var PHONICS={
+    A:["ay or ah","acorn, apple, and ant"],B:["buh","ball, bear, and banana"],C:["kuh","cat, car, and cup"],D:["duh","dog, duck, and drum"],
+    E:["ee or eh","eagle, egg, and elephant"],F:["fff","fish, fox, and flower"],G:["guh","goat, game, and grapes"],H:["huh","hat, horse, and house"],
+    I:["eye or ih","ice cream, igloo, and insect"],J:["juh","jellyfish, jar, and jump"],K:["kuh","kite, king, and kitten"],L:["lll","lion, leaf, and lamp"],
+    M:["mmm","moon, mouse, and milk"],N:["nnn","nest, nose, and night"],O:["oh or ah","ocean, octopus, and olive"],P:["puh","pig, pizza, and penguin"],
+    Q:["kwuh","queen, quilt, and quiet"],R:["rrr","rainbow, rabbit, and ring"],S:["sss","sun, sock, and snake"],T:["tuh","turtle, tiger, and tree"],
+    U:["you or uh","unicorn, umbrella, and up"],V:["vvv","violin, van, and volcano"],W:["wuh","whale, wagon, and window"],X:["ks","fox, box, and six"],
+    Y:["yuh","yo-yo, yarn, and yellow"],Z:["zzz","zebra, zipper, and zoo"]
+  };
   var EXERCISES=[
     ["jump","⭐","Star jumps","5 jumps"],["march","🥁","March in place","10 steps"],["stretch","🌳","Reach up tall","Count to 5"],["balance","🦩","Flamingo balance","5 seconds each foot"],["squat","🪑","Chair squats","5 squats"],["twist","🌪️","Side-to-side twists","10 twists"],["toe","👟","Touch your toes","5 times"],["arms","✈️","Airplane arms","Count to 10"],["hop","🐰","Bunny hops","5 hops"]
   ];
@@ -281,6 +291,7 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
   function say(t){try{var u=new SpeechSynthesisUtterance(t);u.rate=.85;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
   function dayNumber(d){return Math.floor(new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime()/86400000)}
   function dailyLetter(d){return LETTERS[((dayNumber(d)%LETTERS.length)+LETTERS.length)%LETTERS.length]}
+  function phonicsLine(letter){var p=PHONICS[letter[0]];return "The letter "+letter[0]+" says "+p[0]+", like "+p[1]+"."}
   function dailyMoves(d){var n=dayNumber(d),out=[];for(var i=0;i<3;i++)out.push(EXERCISES[(n*2+i*3)%EXERCISES.length]);return out}
 
   function occurs(it,d){
@@ -386,10 +397,10 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
     if(dayNumber(d)%2)choices=[choices[1],choices[0],choices[2]];
     var moves=dailyMoves(d), wk=iso(d), moveCount=moves.filter(function(m){return workoutDone[wk+":"+m[0]]}).length;
     h+='<div class="daily-fun"><section class="fun-card"><div class="fun-head"><h2>🔤 Letter of the day</h2></div>'
-      +'<button class="letter-launch" data-letter-toggle="1" aria-expanded="'+lessonOpen+'"><span class="letter-badge">'+letter[0]+'</span><span><strong>'+letter[0]+' is for '+letter[1]+'</strong><small>Tap for a mini lesson!</small></span></button>';
+      +'<button class="letter-launch" data-letter-toggle="1" aria-expanded="'+lessonOpen+'"><span class="letter-badge">'+letter[0]+'<small>'+letter[0].toLowerCase()+'</small></span><span><strong>'+letter[0]+' '+letter[0].toLowerCase()+' is for '+letter[1]+'</strong><small>Tap for a mini lesson!</small></span></button>';
     if(lessonOpen){
-      h+='<div class="lesson"><div class="lesson-word"><span class="big">'+letter[2]+'</span>'+letter[0]+' is for '+letter[1]+'</div>'
-        +'<button class="sound-btn" data-say="The letter '+letter[0]+' says '+letter[3]+'. '+letter[0]+' is for '+letter[1]+'.">🔊 Hear the sound</button>'
+      h+='<div class="lesson"><div class="lesson-word"><span class="big">'+letter[2]+'</span>'+letter[0]+' '+letter[0].toLowerCase()+' is for '+letter[1]+'</div>'
+        +'<p>'+esc(phonicsLine(letter))+'</p><button class="sound-btn" data-say="'+esc(phonicsLine(letter))+'">🔊 Hear the letter</button>'
         +'<div class="letter-game"><p>Which picture starts with '+letter[0]+'?</p><div class="letter-choices">';
       choices.forEach(function(ch){h+='<button class="letter-choice'+(letterPick&&ch[0]===letter[0]?" right":"")+'" data-letter-choice="'+ch[0]+'" aria-label="'+esc(ch[1])+'">'+ch[2]+'</button>'});
       h+='</div><div class="letter-feedback" aria-live="polite">'+(letterPick?(letterPick===letter[0]?"🎉 Yes! "+letter[1]+" starts with "+letter[0]+"!":"Almost—listen to the sound and try again!"):"Pick one!")+'</div></div></div>';
