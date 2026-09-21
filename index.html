@@ -85,6 +85,11 @@ body[data-mode="adult"] .person[aria-pressed="true"]{border-color:var(--grape)}
 
 .ghead{display:flex;align-items:center;gap:10px;margin:8px 4px 10px;font-size:26px;font-weight:600}
 .ghead .gi{font-size:42px;line-height:1}
+.ghead-btn{width:100%;justify-content:space-between;border:0;background:transparent;text-align:left;padding:4px 6px}
+.ghead-title{display:flex;align-items:center;gap:10px}
+.ghead-meta{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:18px}
+.ghead-btn .chev{font-size:22px;color:var(--grape);transition:transform .18s ease}
+.ghead-btn[aria-expanded="false"] .chev{transform:rotate(-90deg)}
 .stars{display:flex;gap:6px;font-size:36px;margin:0 0 14px;flex-wrap:wrap}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--tw,210px),1fr));gap:14px;margin-bottom:18px}
 .tile{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
@@ -206,8 +211,8 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
 {"id":"bed","title":"Get ready for bed","emoji":"🛏️","who":["daughter"],"type":"task","repeat":{"kind":"daily"},"slots":["Evening"]},
 {"id":"cook","title":"Cook dinner","emoji":"🍳","who":["mom"],"type":"task","repeat":{"kind":"days","days":[1]},"slots":["Evening"]},
 {"id":"snacks","title":"Pack snacks for snack day","emoji":"🍎","who":["mom"],"type":"task","repeat":{"kind":"date","date":"2026-09-21"},"slots":[]},
-{"id":"school","title":"School","emoji":"🏫","who":["daughter"],"type":"plan","repeat":{"kind":"days","days":[1,2,3,4,5]},"slots":["Morning"]},
-{"id":"gigi","title":"Gigi picks Kaiya up","emoji":"👵🚗","who":["daughter"],"type":"plan","repeat":{"kind":"days","days":[1,2,3,4,5]},"slots":["Afternoon"]}
+{"id":"school","title":"School","emoji":"🏫","who":["daughter"],"type":"plan","repeat":{"kind":"days","days":[1,2,4]},"slots":["Morning"]},
+{"id":"gigi","title":"Gigi / PopPop pick up","emoji":"👵🏽👴🏽🚗","who":["daughter"],"type":"plan","repeat":{"kind":"days","days":[1,2,4]},"slots":["Afternoon"]}
 ]}</script>
 <script>
 (function(){
@@ -227,6 +232,7 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
   function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
   var unlocked=false, pinEntry="", pinBad=false;
   who=load("fp-who","daughter"); done=load("fp-done",{}); checkins=load("fp-checkin",{});
+  var collapsed=load("fp-collapsed",{});
   unlocked=(load("fp-unlock","")===state.pin);
   var local=load("fp-local",{});
   local.add=local.add||[];local.del=local.del||[];local.edit=local.edit||{};
@@ -347,21 +353,24 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
     var tasks=jobs("daughter",d), n=tasks.filter(function(x){return done[x.key]}).length, total=tasks.length;
     var dens=total<=5?"xl":total<=8?"l":total<=13?"m":"s";
     var slotsUsed=["Morning","Afternoon","Evening","Anytime"].filter(function(s){return tasks.some(function(x){return x.slot===s})});
-    var cols=slotsUsed.length>=2&&total>=6;
     if(total&&n===total)h+='<div class="cheer"><span class="big">🎉⭐🎉</span>All done! Great job, Kaiya!</div>';
     if(total){
       h+='<div class="stars" aria-hidden="true">';tasks.forEach(function(x){h+=done[x.key]?"⭐":"☆"});h+='</div>';
-      h+='<div class="groups dens-'+dens+(cols?" cols":"")+'">';
+      h+='<div class="groups dens-'+dens+'">';
       slotsUsed.forEach(function(s){
-        var g=tasks.filter(function(x){return x.slot===s});
-        h+='<div class="gcard"><div class="ghead"><span class="gi">'+SLOT_ICON[s]+'</span>'+(s==="Anytime"?"Any time":s)+'</div><div class="grid">';
-        g.forEach(function(x){
-          var isDone=!!done[x.key];
-          h+='<button class="tile'+(isDone?" done":"")+(justDone===x.key?" pop":"")+'" data-key="'+esc(x.key)+'" aria-pressed="'+isDone+'" aria-label="'+esc(x.it.title)+'">'
-            +'<span class="box" aria-hidden="true"></span><span class="pic">'+esc(x.it.emoji)+'</span><span class="name">'+esc(x.it.title)+'</span>'
-            +'<span class="speak" data-say="'+esc(x.it.title)+'" role="button" aria-label="Hear it">🔊</span></button>';
-        });
-        h+='</div></div>';
+        var g=tasks.filter(function(x){return x.slot===s}), gd=g.filter(function(x){return done[x.key]}).length, isOpen=!collapsed[s];
+        h+='<section class="gcard"><button class="ghead ghead-btn" data-collapse="'+s+'" aria-expanded="'+isOpen+'"><span class="ghead-title"><span class="gi">'+SLOT_ICON[s]+'</span>'+(s==="Anytime"?"Any time":s)+'</span><span class="ghead-meta">'+gd+'/'+g.length+' <span class="chev" aria-hidden="true">▼</span></span></button>';
+        if(isOpen){
+          h+='<div class="grid">';
+          g.forEach(function(x){
+            var isDone=!!done[x.key];
+            h+='<button class="tile'+(isDone?" done":"")+(justDone===x.key?" pop":"")+'" data-key="'+esc(x.key)+'" aria-pressed="'+isDone+'" aria-label="'+esc(x.it.title)+'">'
+              +'<span class="box" aria-hidden="true"></span><span class="pic">'+esc(x.it.emoji)+'</span><span class="name">'+esc(x.it.title)+'</span>'
+              +'<span class="speak" data-say="'+esc(x.it.title)+'" role="button" aria-label="Hear it">🔊</span></button>';
+          });
+          h+='</div>';
+        }
+        h+='</section>';
       });
       h+='</div>';
     } else {
@@ -603,6 +612,10 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
       var k=tile.getAttribute("data-key");
       if(done[k])delete done[k];else{done[k]=1;justDone=k}
       save("fp-done",done);render();return;
+    }
+    var cg=t.closest("[data-collapse]");
+    if(cg&&!sheetOpen){
+      var cs=cg.getAttribute("data-collapse");collapsed[cs]=!collapsed[cs];save("fp-collapsed",collapsed);render();return;
     }
     var f=t.closest("[data-f]");
     if(f&&editing){

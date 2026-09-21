@@ -28,3 +28,5 @@ The initial grown-up PIN is `123`. It can be changed in Grown-up settings.
 ## Deploy
 
 The repository can be published directly with GitHub Pages using the root of the `main` branch.
+
+For the recommended multi-person Airtable data model, see [`AIRTABLE_SETUP.md`](AIRTABLE_SETUP.md).
