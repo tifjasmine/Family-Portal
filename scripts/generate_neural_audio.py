@@ -29,10 +29,10 @@ def lesson(letter):
     else:
         sound, examples = basic[letter]
         teaching = f"The letter {letter} says {sound}... like {examples}."
-    return f"{opening} {teaching}... Which picture starts with {letter}?... Tap each picture to hear its name... Then press submit."
+    return f"{opening} {teaching}... Which picture starts with {letter}?... Tap each picture to hear its name... Then press the check."
 
 def question(letter):
-    return f"Which picture starts with {letter}?... Tap each picture to hear its name... Then press submit."
+    return f"Which picture starts with {letter}?... Tap each picture to hear its name... Then press the check."
 
 async def create(path, text, gate):
     async with gate:

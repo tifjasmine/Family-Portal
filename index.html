@@ -56,6 +56,9 @@ body[data-mode="adult"] .person[aria-pressed="true"]{border-color:var(--grape)}
 .kid-day b{display:block;font-size:22px;color:var(--ink)}.kid-day span{display:block;min-height:24px;font-size:18px;white-space:nowrap;overflow:hidden}
 .kid-day[aria-current="true"]{background:var(--grape);border-color:var(--grape);color:#fff;transform:translateY(-2px)}.kid-day[aria-current="true"] b{color:#fff}
 @media(max-width:560px){.kid-week{gap:4px}.kid-day{border-width:2px;border-radius:14px;padding:7px 1px;font-size:11px}.kid-day b{font-size:18px}.kid-day span{font-size:15px}}
+.reward-card{background:linear-gradient(135deg,#6b4eff,#8e72ff);color:#fff;border-radius:28px;padding:16px 18px;margin:0 0 20px;display:grid;grid-template-columns:auto 1fr;gap:12px 16px;align-items:center}
+.reward-star{font-size:58px;line-height:1}.reward-card h2{margin:0;font-size:23px}.reward-card p{margin:2px 0 0;font-size:17px}.reward-track{grid-column:1/-1;height:14px;border-radius:99px;background:rgba(255,255,255,.3);overflow:hidden}.reward-track i{display:block;height:100%;border-radius:99px;background:var(--sun)}
+.reward-card.won{background:linear-gradient(135deg,#16a34a,#2dbe60);animation:pop .45s ease-out}.reward-card.won .reward-star{font-size:68px}
 .nav{display:flex;gap:8px}
 .nav button{border:1px solid var(--line);background:var(--paper);border-radius:12px;padding:9px 16px;font-weight:500;font-size:16px}
 
@@ -282,6 +285,8 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
   who=load("fp-who","daughter"); done=load("fp-done",{}); checkins=load("fp-checkin",{});
   var collapsed=load("fp-collapsed",{});
   var workoutDone=load("fp-workout",{}), lessonOpen=false, letterPick="", letterSubmitted=false;
+  var reward=load("fp-reward",{stars:0,goal:20,prize:"Choose a special treat!"});
+  reward.stars=Math.max(0,+reward.stars||0);reward.goal=Math.max(1,+reward.goal||20);reward.prize=reward.prize||"Choose a special treat!";
   unlocked=(load("fp-unlock","")===state.pin);
   var local=load("fp-local",{});
   local.add=local.add||[];local.del=local.del||[];local.edit=local.edit||{};
@@ -336,7 +341,7 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
     if(l==="U")return "Big U, little u. U says you, like unicorn. U also says uh, like umbrella.";
     return "Big "+l+", little "+l.toLowerCase()+". "+l+" says "+p[0]+". Like "+p[1]+".";
   }
-  function letterQuestion(letter){return "Which picture starts with "+letter[0]+"? Tap a picture. Then press submit."}
+  function letterQuestion(letter){return "Which picture starts with "+letter[0]+"? Tap a picture. Then press the check."}
   function dailyMoves(d){var n=dayNumber(d),out=[];for(var i=0;i<3;i++)out.push(EXERCISES[(n*2+i*3)%EXERCISES.length]);return out}
 
   function occurs(it,d){
@@ -359,6 +364,10 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
   }
   function plans(pid,d){return instances(pid,d).filter(function(x){return x.it.type==="plan"})}
   function jobs(pid,d){return instances(pid,d).filter(function(x){return x.it.type!=="plan"})}
+  function isKaiyaKey(key){
+    var parts=String(key).split(":");if(parts.length<4)return false;
+    return items().some(function(it){return it.id===parts[2]&&(it.who||[]).indexOf("daughter")>-1});
+  }
 
   /* ---------- avatars ---------- */
   function avatar(id,size){
@@ -406,6 +415,8 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
       h+='<button class="kid-day" data-goto="'+woff+'" aria-current="'+(iso(wd)===iso(d))+'">'+DOW[wi]+'<b>'+wd.getDate()+'</b><span>'+wplans.map(function(x){return x.it.emoji}).join('')+'</span></button>';
     }
     h+='</div>';
+    var rewardWon=reward.stars>=reward.goal,rewardPct=Math.min(100,Math.round(100*reward.stars/reward.goal));
+    h+='<div class="reward-card'+(rewardWon?' won':'')+'"><div class="reward-star">'+(rewardWon?'🏆':'⭐')+'</div><div><h2>'+(rewardWon?'You earned your prize!':reward.stars+' of '+reward.goal+' stars')+'</h2><p>'+(rewardWon?esc(reward.prize):'Keep going! Your prize is: '+esc(reward.prize))+'</p></div><div class="reward-track"><i style="width:'+rewardPct+'%"></i></div></div>';
 
     // check-in (collapses once it is finished)
     var complete=!!(emo&&c.day!=null), showFull=!complete||ciEdit, ci="";
@@ -455,7 +466,7 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
         +'<p>'+esc(phonicsLine(letter))+'</p><button class="sound-btn" data-audio="audio/lessons/'+letter[0].toLowerCase()+'.mp3" data-fallback="'+esc(phonicsLine(letter)+' '+letterQuestion(letter))+'">🔊 Hear the lesson</button>'
         +'<div class="letter-game"><p>'+esc(letterQuestion(letter))+' <button class="mini-say" data-audio="audio/questions/'+letter[0].toLowerCase()+'.mp3" data-fallback="'+esc(letterQuestion(letter))+'" aria-label="Hear the question">🔊</button></p><div class="letter-choices">';
       choices.forEach(function(ch){var picked=letterPick===ch[0],right=letterSubmitted&&picked&&ch[0]===letter[0],wrong=letterSubmitted&&picked&&ch[0]!==letter[0];h+='<button class="letter-choice'+(picked?" selected":"")+(right?" right":"")+(wrong?" wrong":"")+'" data-letter-choice="'+ch[0]+'" data-audio="audio/words/'+ch[0].toLowerCase()+'.mp3" data-fallback="'+esc(ch[1])+'." aria-pressed="'+picked+'" aria-label="'+esc(ch[1])+'">'+ch[2]+'</button>'});
-      h+='</div><button class="letter-submit" data-letter-submit="1"'+(letterPick?'':' disabled')+'>Submit answer</button><div class="letter-feedback" aria-live="polite">'+(letterSubmitted?(letterPick===letter[0]?"🎉 Yes! "+letter[1]+" starts with "+letter[0]+"!":"Almost—listen again and choose another picture!"):(letterPick?"You picked "+LETTERS.filter(function(x){return x[0]===letterPick})[0][1]+". Press submit when you’re ready!":"Tap each picture to hear its name."))+'</div></div></div>';
+      h+='</div><button class="letter-submit" data-letter-submit="1" aria-label="Check answer"'+(letterPick?'':' disabled')+'>✓ Check answer</button><div class="letter-feedback" aria-live="polite">'+(letterSubmitted?(letterPick===letter[0]?"🎉 Yes! "+letter[1]+" starts with "+letter[0]+"!":"Almost—listen again and choose another picture!"):(letterPick?"You picked "+LETTERS.filter(function(x){return x[0]===letterPick})[0][1]+". Press the check when you’re ready!":"Tap each picture to hear its name."))+'</div></div></div>';
     }
     h+='</section><section class="fun-card"><div class="fun-head"><h2>💪 Morning workout</h2><span>'+moveCount+'/3</span></div><div class="workout-list">';
     moves.forEach(function(m){var mk=wk+":"+m[0], mDone=!!workoutDone[mk];h+='<button class="move'+(mDone?" done":"")+'" data-workout="'+esc(mk)+'" aria-pressed="'+mDone+'"><span class="move-emoji">'+m[1]+'</span><span><strong>'+m[2]+'</strong><small>'+m[3]+'</small></span><span class="move-check" aria-hidden="true"></span></button>'});
@@ -625,6 +636,7 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
           +'<button class="btn" data-act="edit" data-id="'+esc(it.id)+'">Edit</button></div>';
       });
       h+='<div class="form"><label>PIN to open the Portal on this device (3 to 8 numbers)</label><div style="display:flex;gap:8px"><input type="text" id="f-pin" inputmode="numeric" maxlength="8" value="'+esc(state.pin)+'"><button class="btn main" data-act="setpin">Set PIN</button></div></div>';
+      h+='<div class="form"><label>Stars needed for Kaiya’s prize</label><input type="text" id="f-reward-goal" inputmode="numeric" value="'+reward.goal+'"><label>Prize</label><input type="text" id="f-reward-prize" value="'+esc(reward.prize)+'"><div class="actions"><button class="btn main" data-act="save-reward">Save reward</button>'+(reward.stars>=reward.goal?'<button class="btn" data-act="redeem-reward">Prize given — start next goal</button>':'')+'</div><p class="msg">Kaiya currently has '+reward.stars+' stars.</p></div>';
       h+='<div class="actions"><button class="btn main" data-act="add-task">Add task</button><button class="btn main" data-act="add-plan">Add calendar item</button>'
         +'<button class="btn" data-act="lock">Lock now</button><button class="btn" data-act="reset-today">Uncheck today</button><button class="btn" data-act="close">Close</button></div>';
     }
@@ -733,8 +745,8 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
     var tile=t.closest("[data-key]");
     if(tile&&!sheetOpen){
       var k=tile.getAttribute("data-key");
-      if(done[k])delete done[k];else{done[k]=1;justDone=k}
-      save("fp-done",done);render();return;
+      if(done[k]){delete done[k];if(isKaiyaKey(k))reward.stars=Math.max(0,reward.stars-1)}else{done[k]=1;justDone=k;if(isKaiyaKey(k))reward.stars++}
+      save("fp-done",done);save("fp-reward",reward);render();return;
     }
     var cg=t.closest("[data-collapse]");
     if(cg&&!sheetOpen){
@@ -762,6 +774,13 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
         if(pv.length<3){sheetMsg="The PIN needs at least 3 numbers.";render();return}
         state.pin=pv;save("fp-pin",pv);save("fp-unlock",pv);sheetMsg="PIN saved on this device.";render();
       }
+      else if(act==="save-reward"){
+        var rg=Math.max(1,parseInt((document.getElementById("f-reward-goal").value||"20"),10)||20),rp=(document.getElementById("f-reward-prize").value||"").trim();
+        reward.goal=rg;reward.prize=rp||"Choose a special treat!";save("fp-reward",reward);sheetMsg="Reward saved.";render();
+      }
+      else if(act==="redeem-reward"){
+        if(reward.stars>=reward.goal)reward.stars-=reward.goal;save("fp-reward",reward);sheetMsg="Prize marked as given. A new goal has started!";render();
+      }
       else if(act==="cancel-edit"){editing=null;sheetMsg="";confirmDel=false;if(!editFromList)sheetOpen=false;render()}
       else if(act==="save")saveEdit();
       else if(act==="delete"){
@@ -776,7 +795,7 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
           editing=null;sheetMsg="Deleted on this device.";if(!editFromList){sheetOpen=false;sheetMsg=""}render();
         }
       }
-      else if(act==="reset-today"){var pre="d:"+iso(viewDate())+":";Object.keys(done).forEach(function(k3){if(k3.indexOf(pre)===0)delete done[k3]});delete checkins[iso(viewDate())];save("fp-done",done);save("fp-checkin",checkins);sheetOpen=false;render()}
+      else if(act==="reset-today"){var pre="d:"+iso(viewDate())+":";Object.keys(done).forEach(function(k3){if(k3.indexOf(pre)===0){if(isKaiyaKey(k3))reward.stars=Math.max(0,reward.stars-1);delete done[k3]}});delete checkins[iso(viewDate())];save("fp-done",done);save("fp-checkin",checkins);save("fp-reward",reward);sheetOpen=false;render()}
       return;
     }
     if(t.id==="sheet"){sheetOpen=false;editing=null;render()}
