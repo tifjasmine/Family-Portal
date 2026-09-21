@@ -51,6 +51,7 @@ body[data-mode="adult"] .person[aria-pressed="true"]{border-color:var(--grape)}
 .dayline{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 2px 16px}
 .dayline h1{margin:0;font-size:clamp(30px,5vw,46px);font-weight:700;line-height:1.05}
 .dayline .sub{color:var(--muted);font-size:18px;font-weight:500}
+.sync-alert{background:#fff4ce;border:2px solid #d49b00;color:#5b3c00;border-radius:14px;padding:10px 14px;margin:0 0 14px;font:600 14px "DM Sans",system-ui,sans-serif}
 .kid-week{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;margin:0 0 18px}
 .kid-day{border:3px solid var(--line);border-radius:18px;background:var(--paper);padding:8px 3px;text-align:center;font-weight:600;color:var(--muted)}
 .kid-day b{display:block;font-size:22px;color:var(--ink)}.kid-day span{display:block;min-height:24px;font-size:18px;white-space:nowrap;overflow:hidden}
@@ -237,6 +238,7 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
 <div id="fp-app"></div>
 <script type="application/json" id="fp-data">{"pin":"123","items":[
 {"id":"teeth","title":"Brush teeth","emoji":"🪥","who":["daughter"],"type":"task","repeat":{"kind":"daily"},"slots":["Morning","Evening"]},
+{"id":"rec4pdOVDUyTA5uKi","title":"Make your bed","emoji":"🛌","who":["daughter"],"type":"task","repeat":{"kind":"daily"},"slots":["Morning"]},
 {"id":"dressed","title":"Get dressed","emoji":"👕","who":["daughter"],"type":"task","repeat":{"kind":"daily"},"slots":["Morning"]},
 {"id":"cream","title":"Lotion","emoji":"🧴","who":["daughter","mom"],"type":"task","repeat":{"kind":"daily"},"slots":["Morning","Evening"]},
 {"id":"read","title":"Read a book","emoji":"📚","who":["daughter"],"type":"task","repeat":{"kind":"daily"},"slots":["Afternoon"]},
@@ -258,7 +260,7 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
   var MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
   var EMOTIONS=[["happy","😊","Happy"],["excited","🤩","Excited"],["calm","😌","Calm"],["silly","🤪","Silly"],["tired","😴","Tired"],["sad","😢","Sad"],["mad","😠","Mad"],["scared","😨","Scared"]];
   var LETTERS=[
-    ["A","apple","🍎","short a, ah"],["B","ball","⚽","buh"],["C","cat","🐱","kuh"],["D","dog","🐶","duh"],["E","egg","🥚","short e, eh"],["F","fish","🐟","fff"],["G","goat","🐐","guh"],["H","hat","🎩","huh"],["I","igloo","🧊","short i, ih"],["J","jellyfish","🪼","juh"],["K","kite","🪁","kuh"],["L","lion","🦁","lll"],["M","moon","🌙","mmm"],["N","nest","🪺","nnn"],["O","octopus","🐙","short o, ah"],["P","pig","🐷","puh"],["Q","queen","👑","kwuh"],["R","rainbow","🌈","rrr"],["S","sun","☀️","sss"],["T","turtle","🐢","tuh"],["U","umbrella","☂️","short u, uh"],["V","violin","🎻","vuh"],["W","whale","🐋","wuh"],["X","xylophone","🎼","ks"],["Y","yo-yo","🪀","yuh"],["Z","zebra","🦓","zzz"]
+    ["A","apple","🍎",""],["B","ball","⚽",""],["C","cat","🐱",""],["D","dog","🐶",""],["E","egg","🥚",""],["F","fish","🐟",""],["G","goat","🐐",""],["H","hat","🎩",""],["I","igloo","🧊",""],["J","jellyfish","🪼",""],["K","kite","🪁",""],["L","lion","🦁",""],["M","moon","🌙",""],["N","nest","🪺",""],["O","octopus","🐙",""],["P","pig","🐷",""],["Q","queen","👑",""],["R","rainbow","🌈",""],["S","sun","☀️",""],["T","turtle","🐢",""],["U","umbrella","☂️",""],["V","violin","🎻",""],["W","whale","🐋",""],["X","fox","🦊",""],["Y","yo-yo","🪀",""],["Z","zebra","🦓",""]
   ];
   var PHONICS={
     A:["ay or ah","acorn, apple, and ant"],B:["buh","ball, bear, and banana"],C:["kuh","cat, car, and cup"],D:["duh","dog, duck, and drum"],
@@ -277,6 +279,7 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
   state.pin=String(load("fp-pin",state.pin||"123"));
   var app=document.getElementById("fp-app");
   var artifact=null, offset=0, editing=null, sheetOpen=false, justDone=null, sheetMsg="", shakeIdx=null, ciEdit=false;
+  var syncMessage=location.protocol==="file:"?"This local file cannot sync with Airtable. Open the Netlify draft for updates.":"Checking Airtable connection…";
   var who="daughter", done={}, checkins={};
 
   function load(k,d){try{var v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}}
@@ -333,15 +336,13 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
   function dayNumber(d){return Math.floor(new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime()/86400000)}
   function dailyLetter(d){return LETTERS[((dayNumber(d)%LETTERS.length)+LETTERS.length)%LETTERS.length]}
   function phonicsLine(letter){
-    var l=letter[0],p=PHONICS[l];
-    if(l==="A")return "Big A, little a. A says ay, like acorn. A also says ah, like apple.";
-    if(l==="E")return "Big E, little e. E says ee, like eagle. E also says eh, like egg.";
-    if(l==="I")return "Big I, little i. I says eye, like ice cream. I also says ih, like igloo.";
-    if(l==="O")return "Big O, little o. O says oh, like ocean. O also says ah, like octopus.";
-    if(l==="U")return "Big U, little u. U says you, like unicorn. U also says uh, like umbrella.";
-    return "Big "+l+", little "+l.toLowerCase()+". "+l+" says "+p[0]+". Like "+p[1]+".";
+    var l=letter[0], examples={A:"apple and ant",E:"egg and elephant",I:"igloo and insect",O:"octopus and olive",U:"umbrella and up"};
+    if(l==="X")return "Big X, little x. Listen to the last sound in fox: fox. You can hear it in box and six, too.";
+    if(l==="V")return "Big V, little v. Listen to the first sound in van: van. Put your top teeth on your lower lip. Feel it buzz! Violin and volcano begin that way, too.";
+    var words=examples[l]||PHONICS[l][1];
+    return "Big "+l+", little "+l.toLowerCase()+". Listen to the first sound in "+letter[1]+": "+letter[1]+". You can hear it in "+words+", too.";
   }
-  function letterQuestion(letter){return "Which picture starts with "+letter[0]+"? Tap a picture. Then press the check."}
+  function letterQuestion(letter){return (letter[0]==="X"?"Which picture has the X sound at the end?":"Which picture starts with "+letter[0]+"?")+" Tap a picture. Then press the check."}
   function dailyMoves(d){var n=dayNumber(d),out=[];for(var i=0;i<3;i++)out.push(EXERCISES[(n*2+i*3)%EXERCISES.length]);return out}
 
   function occurs(it,d){
@@ -460,13 +461,13 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
     if(dayNumber(d)%2)choices=[choices[1],choices[0],choices[2]];
     var moves=dailyMoves(d), wk=iso(d), moveCount=moves.filter(function(m){return workoutDone[wk+":"+m[0]]}).length;
     h+='<div class="daily-fun"><section class="fun-card"><div class="fun-head"><h2>🔤 Letter of the day</h2></div>'
-      +'<button class="letter-launch" data-letter-toggle="1" aria-expanded="'+lessonOpen+'"><span class="letter-badge">'+letter[0]+'<small>'+letter[0].toLowerCase()+'</small></span><span><strong>'+letter[0]+' '+letter[0].toLowerCase()+' is for '+letter[1]+'</strong><small>Tap for a mini lesson!</small></span></button>';
+      +'<button class="letter-launch" data-letter-toggle="1" aria-expanded="'+lessonOpen+'"><span class="letter-badge">'+letter[0]+'<small>'+letter[0].toLowerCase()+'</small></span><span><strong>'+letter[0]+' '+letter[0].toLowerCase()+(letter[0]==="X"?' is in ':' is for ')+letter[1]+'</strong><small>Tap for a mini lesson!</small></span></button>';
     if(lessonOpen){
-      h+='<div class="lesson"><div class="lesson-word"><span class="big">'+letter[2]+'</span>'+letter[0]+' '+letter[0].toLowerCase()+' is for '+letter[1]+'</div>'
+      h+='<div class="lesson"><div class="lesson-word"><span class="big">'+letter[2]+'</span>'+letter[0]+' '+letter[0].toLowerCase()+(letter[0]==="X"?' is in ':' is for ')+letter[1]+'</div>'
         +'<p>'+esc(phonicsLine(letter))+'</p><button class="sound-btn" data-audio="audio/lessons/'+letter[0].toLowerCase()+'.mp3" data-fallback="'+esc(phonicsLine(letter)+' '+letterQuestion(letter))+'">🔊 Hear the lesson</button>'
         +'<div class="letter-game"><p>'+esc(letterQuestion(letter))+' <button class="mini-say" data-audio="audio/questions/'+letter[0].toLowerCase()+'.mp3" data-fallback="'+esc(letterQuestion(letter))+'" aria-label="Hear the question">🔊</button></p><div class="letter-choices">';
       choices.forEach(function(ch){var picked=letterPick===ch[0],right=letterSubmitted&&picked&&ch[0]===letter[0],wrong=letterSubmitted&&picked&&ch[0]!==letter[0];h+='<button class="letter-choice'+(picked?" selected":"")+(right?" right":"")+(wrong?" wrong":"")+'" data-letter-choice="'+ch[0]+'" data-audio="audio/words/'+ch[0].toLowerCase()+'.mp3" data-fallback="'+esc(ch[1])+'." aria-pressed="'+picked+'" aria-label="'+esc(ch[1])+'">'+ch[2]+'</button>'});
-      h+='</div><button class="letter-submit" data-letter-submit="1" aria-label="Check answer"'+(letterPick?'':' disabled')+'>✓ Check answer</button><div class="letter-feedback" aria-live="polite">'+(letterSubmitted?(letterPick===letter[0]?"🎉 Yes! "+letter[1]+" starts with "+letter[0]+"!":"Almost—listen again and choose another picture!"):(letterPick?"You picked "+LETTERS.filter(function(x){return x[0]===letterPick})[0][1]+". Press the check when you’re ready!":"Tap each picture to hear its name."))+'</div></div></div>';
+      h+='</div><button class="letter-submit" data-letter-submit="1" aria-label="Check answer"'+(letterPick?'':' disabled')+'>✓ Check answer</button><div class="letter-feedback" aria-live="polite">'+(letterSubmitted?(letterPick===letter[0]?"🎉 Yes! "+letter[1]+(letter[0]==="X"?" ends with the X sound!":" starts with "+letter[0]+"!"):"Almost—listen again and choose another picture!"):(letterPick?"You picked "+LETTERS.filter(function(x){return x[0]===letterPick})[0][1]+". Press the check when you’re ready!":"Tap each picture to hear its name."))+'</div></div></div>';
     }
     h+='</section><section class="fun-card"><div class="fun-head"><h2>💪 Morning workout</h2><span>'+moveCount+'/3</span></div><div class="workout-list">';
     moves.forEach(function(m){var mk=wk+":"+m[0], mDone=!!workoutDone[mk];h+='<button class="move'+(mDone?" done":"")+'" data-workout="'+esc(mk)+'" aria-pressed="'+mDone+'"><span class="move-emoji">'+m[1]+'</span><span><strong>'+m[2]+'</strong><small>'+m[3]+'</small></span><span class="move-check" aria-hidden="true"></span></button>'});
@@ -602,6 +603,7 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
     var h='<div class="top"><div class="people">';
     PEOPLE.forEach(function(p){h+='<button class="person" data-who="'+p.id+'" aria-pressed="'+(p.id===who)+'"><span class="face">'+avatar(p.id,kid?60:36)+'</span>'+p.name+'</button>'});
     h+='</div><button class="gear" id="gear" aria-label="Grown-up settings (press and hold)">⚙️</button></div>';
+    if(syncMessage)h+='<div class="sync-alert" role="status">'+esc(syncMessage)+'</div>';
     h+=kid?kidView(d):adultView(d);
     if(sheetOpen)h+=sheet();
     app.innerHTML=h;
@@ -807,11 +809,12 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
   var lastDay=iso(new Date());
   var lastSync=0;
   function syncAirtable(force){
+    if(location.protocol==="file:")return Promise.resolve();
     if(!force&&Date.now()-lastSync<30000)return Promise.resolve();
     lastSync=Date.now();
-    return fetch("/.netlify/functions/family-data",{cache:"no-store"}).then(function(r){if(!r.ok)throw new Error("sync unavailable");return r.json()}).then(function(data){
-      if(data.items&&data.items.length){state.items=data.items;local.edit={};local.del=[];save("fp-local",local);if(!sheetOpen)render()}
-    }).catch(function(){});
+    return fetch("/.netlify/functions/family-data",{cache:"no-store"}).then(function(r){if(!r.ok)throw new Error(r.status===503?"Airtable sync needs its secure token in Netlify.":"Airtable sync is unavailable right now.");return r.json()}).then(function(data){
+      if(Array.isArray(data.items)){state.items=data.items;local.edit={};local.del=[];save("fp-local",local);syncMessage="";if(!sheetOpen)render()}
+    }).catch(function(err){syncMessage=err.message||"Airtable sync is unavailable right now.";if(!sheetOpen)render()});
   }
   function tick(){var dn=iso(new Date());if(dn!==lastDay){lastDay=dn;if(offset===0&&!sheetOpen)render()}syncAirtable(false)}
   setInterval(tick,60000);

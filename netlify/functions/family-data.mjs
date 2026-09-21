@@ -25,7 +25,7 @@ async function records(table, token) {
 }
 
 const choice = value => value && typeof value === "object" ? value.name : value;
-const choices = value => (Array.isArray(value) ? value.map(choice) : []);
+const choices = value => Array.isArray(value) ? value.map(choice) : value ? [choice(value)] : [];
 const dayNumber = { Sun:0, Mon:1, Tue:2, Wed:3, Thu:4, Fri:5, Sat:6 };
 const person = { Kaiya:"daughter", Mom:"mom", Dad:"dad" };
 
@@ -70,4 +70,3 @@ export async function handler() {
     return json(502, { error:error.message || "Could not load Airtable" });
   }
 }
-

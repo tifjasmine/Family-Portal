@@ -23,16 +23,20 @@ words = dict(zip(letters, "apple ball cat dog egg fish goat hat igloo jellyfish 
 
 def lesson(letter):
     opening = f"Big {letter}... Little {letter.lower()}..."
-    if letter in vowels:
-        first, example, second, examples = vowels[letter]
-        teaching = f"The letter {letter} can say {first}... like {example}... It can also say {second}... like {examples}."
+    if letter == "X":
+        teaching = "Listen to the last sound in fox... fox... You can hear it in box and six, too."
+    elif letter == "V":
+        teaching = "Listen to the first sound in van... van... Put your top teeth on your lower lip... Feel it buzz! Violin and volcano begin that way, too."
     else:
-        sound, examples = basic[letter]
-        teaching = f"The letter {letter} says {sound}... like {examples}."
-    return f"{opening} {teaching}... Which picture starts with {letter}?... Tap each picture to hear its name... Then press the check."
+        examples = {"A":"apple and ant", "E":"egg and elephant", "I":"igloo and insect", "O":"octopus and olive", "U":"umbrella and up"}
+        word = words[letter]
+        other = examples[letter] if letter in examples else basic[letter][1]
+        teaching = f"Listen to the first sound in {word}... {word}... You can hear it in {other}, too."
+    return f"{opening} {teaching}... {question(letter)}"
 
 def question(letter):
-    return f"Which picture starts with {letter}?... Tap each picture to hear its name... Then press the check."
+    prompt = "Which picture has the X sound at the end?" if letter == "X" else f"Which picture starts with {letter}?"
+    return f"{prompt}... Tap each picture to hear its name... Then press the check."
 
 async def create(path, text, gate):
     async with gate:
@@ -55,4 +59,5 @@ async def main():
     ]
     await asyncio.gather(*clips)
 
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())
