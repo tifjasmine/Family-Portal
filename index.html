@@ -275,7 +275,7 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
   var unlocked=false, pinEntry="", pinBad=false;
   who=load("fp-who","daughter"); done=load("fp-done",{}); checkins=load("fp-checkin",{});
   var collapsed=load("fp-collapsed",{});
-  var workoutDone=load("fp-workout",{}), lessonOpen=false, letterPick="", letterSubmitted=false, speechRun=0;
+  var workoutDone=load("fp-workout",{}), lessonOpen=false, letterPick="", letterSubmitted=false;
   unlocked=(load("fp-unlock","")===state.pin);
   var local=load("fp-local",{});
   local.add=local.add||[];local.del=local.del||[];local.edit=local.edit||{};
@@ -303,16 +303,10 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
   }
   function say(t){
     try{
-      var run=++speechRun,parts=String(t).match(/[^.!?]+[.!?]+|[^.!?]+$/g)||[t],i=0;
-      speechSynthesis.cancel();
-      function next(){
-        if(run!==speechRun||i>=parts.length)return;
-        var u=new SpeechSynthesisUtterance(parts[i++].trim()),v=getFriendlyVoice();
-        if(v)u.voice=v;u.rate=.76;u.pitch=1.08;u.volume=1;
-        u.onend=function(){if(run===speechRun)setTimeout(next,420)};
-        speechSynthesis.speak(u);
-      }
-      next();
+      var paced=String(t).replace(/([.!?])\s+/g,"$1 — ");
+      var u=new SpeechSynthesisUtterance(paced),v=getFriendlyVoice();
+      if(v)u.voice=v;u.rate=.82;u.pitch=1.04;u.volume=1;
+      speechSynthesis.cancel();speechSynthesis.speak(u);
     }catch(e){}
   }
   if(window.speechSynthesis)speechSynthesis.addEventListener("voiceschanged",function(){friendlyVoice=null;getFriendlyVoice()});
