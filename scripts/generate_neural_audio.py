@@ -16,7 +16,7 @@ basic = {
     "J":("juh","jellyfish, jar, and jump"), "K":("kuh","kite, king, and kitten"), "L":("lll","lion, leaf, and lamp"),
     "M":("mmm","moon, mouse, and milk"), "N":("nnn","nest, nose, and night"), "P":("puh","pig, pizza, and penguin"),
     "Q":("kwuh","queen, quilt, and quiet"), "R":("rrr","rainbow, rabbit, and ring"), "S":("sss","sun, sock, and snake"),
-    "T":("tuh","turtle, tiger, and tree"), "V":("vvv","violin, van, and volcano"), "W":("wuh","whale, wagon, and window"),
+    "T":("tuh","turtle, tiger, and tree"), "V":("vuh","violin, van, and volcano"), "W":("wuh","whale, wagon, and window"),
     "X":("ks","fox, box, and six"), "Y":("yuh","yo-yo, yarn, and yellow"), "Z":("zzz","zebra, zipper, and zoo"),
 }
 words = dict(zip(letters, "apple ball cat dog egg fish goat hat igloo jellyfish kite lion moon nest octopus pig queen rainbow sun turtle umbrella violin whale fox yarn zebra".split()))
