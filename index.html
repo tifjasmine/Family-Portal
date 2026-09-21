@@ -452,9 +452,9 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
       +'<button class="letter-launch" data-letter-toggle="1" aria-expanded="'+lessonOpen+'"><span class="letter-badge">'+letter[0]+'<small>'+letter[0].toLowerCase()+'</small></span><span><strong>'+letter[0]+' '+letter[0].toLowerCase()+' is for '+letter[1]+'</strong><small>Tap for a mini lesson!</small></span></button>';
     if(lessonOpen){
       h+='<div class="lesson"><div class="lesson-word"><span class="big">'+letter[2]+'</span>'+letter[0]+' '+letter[0].toLowerCase()+' is for '+letter[1]+'</div>'
-        +'<p>'+esc(phonicsLine(letter))+'</p><button class="sound-btn" data-audio="audio/lessons/'+letter[0].toLowerCase()+'.wav" data-fallback="'+esc(phonicsLine(letter)+' '+letterQuestion(letter))+'">🔊 Hear the lesson</button>'
-        +'<div class="letter-game"><p>'+esc(letterQuestion(letter))+' <button class="mini-say" data-audio="audio/questions/'+letter[0].toLowerCase()+'.wav" data-fallback="'+esc(letterQuestion(letter))+'" aria-label="Hear the question">🔊</button></p><div class="letter-choices">';
-      choices.forEach(function(ch){var picked=letterPick===ch[0],right=letterSubmitted&&picked&&ch[0]===letter[0],wrong=letterSubmitted&&picked&&ch[0]!==letter[0];h+='<button class="letter-choice'+(picked?" selected":"")+(right?" right":"")+(wrong?" wrong":"")+'" data-letter-choice="'+ch[0]+'" data-audio="audio/words/'+ch[0].toLowerCase()+'.wav" data-fallback="'+esc(ch[1])+'." aria-pressed="'+picked+'" aria-label="'+esc(ch[1])+'">'+ch[2]+'</button>'});
+        +'<p>'+esc(phonicsLine(letter))+'</p><button class="sound-btn" data-audio="audio/lessons/'+letter[0].toLowerCase()+'.mp3" data-fallback="'+esc(phonicsLine(letter)+' '+letterQuestion(letter))+'">🔊 Hear the lesson</button>'
+        +'<div class="letter-game"><p>'+esc(letterQuestion(letter))+' <button class="mini-say" data-audio="audio/questions/'+letter[0].toLowerCase()+'.mp3" data-fallback="'+esc(letterQuestion(letter))+'" aria-label="Hear the question">🔊</button></p><div class="letter-choices">';
+      choices.forEach(function(ch){var picked=letterPick===ch[0],right=letterSubmitted&&picked&&ch[0]===letter[0],wrong=letterSubmitted&&picked&&ch[0]!==letter[0];h+='<button class="letter-choice'+(picked?" selected":"")+(right?" right":"")+(wrong?" wrong":"")+'" data-letter-choice="'+ch[0]+'" data-audio="audio/words/'+ch[0].toLowerCase()+'.mp3" data-fallback="'+esc(ch[1])+'." aria-pressed="'+picked+'" aria-label="'+esc(ch[1])+'">'+ch[2]+'</button>'});
       h+='</div><button class="letter-submit" data-letter-submit="1"'+(letterPick?'':' disabled')+'>Submit answer</button><div class="letter-feedback" aria-live="polite">'+(letterSubmitted?(letterPick===letter[0]?"🎉 Yes! "+letter[1]+" starts with "+letter[0]+"!":"Almost—listen again and choose another picture!"):(letterPick?"You picked "+LETTERS.filter(function(x){return x[0]===letterPick})[0][1]+". Press submit when you’re ready!":"Tap each picture to hear its name."))+'</div></div></div>';
     }
     h+='</section><section class="fun-card"><div class="fun-head"><h2>💪 Morning workout</h2><span>'+moveCount+'/3</span></div><div class="workout-list">';
@@ -709,11 +709,11 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
     var ce=t.closest("[data-ciedit]");
     if(ce){ciEdit=ce.getAttribute("data-ciedit")==="1";render();return}
     var lt=t.closest("[data-letter-toggle]");
-    if(lt&&!sheetOpen){lessonOpen=!lessonOpen;letterPick="";letterSubmitted=false;render();if(lessonOpen){var openLetter=dailyLetter(viewDate());playClip("audio/lessons/"+openLetter[0].toLowerCase()+".wav",phonicsLine(openLetter)+" "+letterQuestion(openLetter))}return}
+    if(lt&&!sheetOpen){lessonOpen=!lessonOpen;letterPick="";letterSubmitted=false;render();if(lessonOpen){var openLetter=dailyLetter(viewDate());playClip("audio/lessons/"+openLetter[0].toLowerCase()+".mp3",phonicsLine(openLetter)+" "+letterQuestion(openLetter))}return}
     var lc=t.closest("[data-letter-choice]");
     if(lc&&!sheetOpen){letterPick=lc.getAttribute("data-letter-choice");letterSubmitted=false;var pickedLetter=LETTERS.filter(function(x){return x[0]===letterPick})[0];playClip(lc.getAttribute("data-audio"),pickedLetter[1]+".");render();return}
     var ls=t.closest("[data-letter-submit]");
-    if(ls&&!sheetOpen){var dl=dailyLetter(viewDate());if(!letterPick){playClip("audio/feedback/choose.wav","Choose a picture first.");return}letterSubmitted=true;playClip(letterPick===dl[0]?"audio/feedback/correct.wav":"audio/feedback/again.wav",letterPick===dl[0]?"Yes! Great listening!":"Almost. Listen again, and try another picture.");render();return}
+    if(ls&&!sheetOpen){var dl=dailyLetter(viewDate());if(!letterPick){playClip("audio/feedback/choose.mp3","Choose a picture first.");return}letterSubmitted=true;playClip(letterPick===dl[0]?"audio/feedback/correct.mp3":"audio/feedback/again.mp3",letterPick===dl[0]?"Yes! Great listening!":"Almost. Listen again, and try another picture.");render();return}
     var wo=t.closest("[data-workout]");
     if(wo&&!sheetOpen){var wk2=wo.getAttribute("data-workout");if(workoutDone[wk2])delete workoutDone[wk2];else workoutDone[wk2]=1;save("fp-workout",workoutDone);render();return}
     var em=t.closest("[data-emo]");
