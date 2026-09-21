@@ -72,6 +72,31 @@ Use one record per completed task occurrence. This preserves history instead of 
 | Completed | Checkbox | checked |
 | Completed At | Created time | automatic |
 
+## 5. Learning Activities
+
+Use this optional table when you want to choose or override the automatically rotating letter lesson.
+
+| Field | Type | Example |
+| --- | --- | --- |
+| Letter | Single line text (primary) | A |
+| Example Word | Single line text | Apple |
+| Emoji | Single line text | 🍎 |
+| Sound Prompt | Long text | Short A says “ah” |
+| Lesson Date | Date (optional) | 2026-09-21 |
+| Active | Checkbox | checked |
+
+## 6. Workouts
+
+Store reusable movement cards here. The portal can select three active exercises each morning.
+
+| Field | Type | Example |
+| --- | --- | --- |
+| Exercise | Single line text (primary) | Star jumps |
+| Emoji | Single line text | ⭐ |
+| Instruction | Single line text | 5 jumps |
+| Difficulty | Single select | Easy |
+| Active | Checkbox | checked |
+
 ## Recommended views
 
 In **Routine Tasks**, create filtered views: `Kaiya Tasks`, `Mom Tasks`, and `Dad Tasks`.
