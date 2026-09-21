@@ -303,9 +303,9 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
   }
   function say(t){
     try{
-      var paced=String(t).replace(/([.!?])\s+/g,"$1 — ");
+      var paced=String(t).replace(/([.!?])\s+/g,"$1\n\n");
       var u=new SpeechSynthesisUtterance(paced),v=getFriendlyVoice();
-      if(v)u.voice=v;u.rate=.82;u.pitch=1.04;u.volume=1;
+      if(v)u.voice=v;u.rate=.76;u.pitch=1.08;u.volume=1;
       speechSynthesis.cancel();speechSynthesis.speak(u);
     }catch(e){}
   }
@@ -314,14 +314,14 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
   function dailyLetter(d){return LETTERS[((dayNumber(d)%LETTERS.length)+LETTERS.length)%LETTERS.length]}
   function phonicsLine(letter){
     var l=letter[0],p=PHONICS[l];
-    if(l==="A")return "This is big A and little a. A can say ay, like acorn and ate. A can also say ah, like apple and ant. Can you say A?";
-    if(l==="E")return "This is big E and little e. E can say ee, like eagle. E can also say eh, like egg and elephant. Can you say E?";
-    if(l==="I")return "This is big I and little i. I can say eye, like ice cream. I can also say ih, like igloo and insect. Can you say I?";
-    if(l==="O")return "This is big O and little o. O can say oh, like ocean. O can also say ah, like octopus and olive. Can you say O?";
-    if(l==="U")return "This is big U and little u. U can say you, like unicorn. U can also say uh, like umbrella and up. Can you say U?";
-    return "This is big "+l+" and little "+l.toLowerCase()+". The letter "+l+" says "+p[0]+", like "+p[1]+". Can you say "+l+"?";
+    if(l==="A")return "Big A, little a. A says ay, like acorn. A also says ah, like apple.";
+    if(l==="E")return "Big E, little e. E says ee, like eagle. E also says eh, like egg.";
+    if(l==="I")return "Big I, little i. I says eye, like ice cream. I also says ih, like igloo.";
+    if(l==="O")return "Big O, little o. O says oh, like ocean. O also says ah, like octopus.";
+    if(l==="U")return "Big U, little u. U says you, like unicorn. U also says uh, like umbrella.";
+    return "Big "+l+", little "+l.toLowerCase()+". "+l+" says "+p[0]+". Like "+p[1]+".";
   }
-  function letterQuestion(letter){return "Which picture starts with the letter "+letter[0]+"? Tap a picture to hear its name. Then press submit."}
+  function letterQuestion(letter){return "Which picture starts with "+letter[0]+"? Tap a picture. Then press submit."}
   function dailyMoves(d){var n=dayNumber(d),out=[];for(var i=0;i<3;i++)out.push(EXERCISES[(n*2+i*3)%EXERCISES.length]);return out}
 
   function occurs(it,d){
