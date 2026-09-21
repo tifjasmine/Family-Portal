@@ -288,10 +288,28 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
   function iso(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())}
   function dayAt(off){var d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+off);return d}
   function viewDate(){return dayAt(offset)}
-  function say(t){try{var u=new SpeechSynthesisUtterance(t);u.rate=.85;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
+  var friendlyVoice=null;
+  function getFriendlyVoice(){
+    if(friendlyVoice)return friendlyVoice;
+    var voices=(window.speechSynthesis&&speechSynthesis.getVoices?speechSynthesis.getVoices():[])||[];
+    var preferred=["Samantha","Ava","Zoe","Google US English","Microsoft Aria","Microsoft Jenny","Karen"];
+    preferred.some(function(name){friendlyVoice=voices.filter(function(v){return v.name.indexOf(name)>-1&&/^en/i.test(v.lang)})[0]||null;return !!friendlyVoice});
+    if(!friendlyVoice)friendlyVoice=voices.filter(function(v){return /^en-US/i.test(v.lang)&&v.localService})[0]||voices.filter(function(v){return /^en/i.test(v.lang)})[0]||null;
+    return friendlyVoice;
+  }
+  function say(t){try{var u=new SpeechSynthesisUtterance(t),v=getFriendlyVoice();if(v)u.voice=v;u.rate=.76;u.pitch=1.08;u.volume=1;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
+  if(window.speechSynthesis)speechSynthesis.addEventListener("voiceschanged",function(){friendlyVoice=null;getFriendlyVoice()});
   function dayNumber(d){return Math.floor(new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime()/86400000)}
   function dailyLetter(d){return LETTERS[((dayNumber(d)%LETTERS.length)+LETTERS.length)%LETTERS.length]}
-  function phonicsLine(letter){var p=PHONICS[letter[0]];return "The letter "+letter[0]+" says "+p[0]+", like "+p[1]+"."}
+  function phonicsLine(letter){
+    var l=letter[0],p=PHONICS[l];
+    if(l==="A")return "This is big A and little a. A can say ay, like acorn and ate. A can also say ah, like apple and ant. Can you say A?";
+    if(l==="E")return "This is big E and little e. E can say ee, like eagle. E can also say eh, like egg and elephant. Can you say E?";
+    if(l==="I")return "This is big I and little i. I can say eye, like ice cream. I can also say ih, like igloo and insect. Can you say I?";
+    if(l==="O")return "This is big O and little o. O can say oh, like ocean. O can also say ah, like octopus and olive. Can you say O?";
+    if(l==="U")return "This is big U and little u. U can say you, like unicorn. U can also say uh, like umbrella and up. Can you say U?";
+    return "This is big "+l+" and little "+l.toLowerCase()+". The letter "+l+" says "+p[0]+", like "+p[1]+". Can you say "+l+"?";
+  }
   function dailyMoves(d){var n=dayNumber(d),out=[];for(var i=0;i<3;i++)out.push(EXERCISES[(n*2+i*3)%EXERCISES.length]);return out}
 
   function occurs(it,d){
