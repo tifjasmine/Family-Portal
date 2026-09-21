@@ -144,7 +144,11 @@ body[data-mode="adult"] .person[aria-pressed="true"]{border-color:var(--grape)}
 .letter-game p{font-size:18px;font-weight:600;margin:0 0 9px}
 .letter-choices{display:flex;justify-content:center;gap:9px;flex-wrap:wrap}
 .letter-choice{border:3px solid var(--line);border-radius:18px;background:var(--paper);padding:9px 13px;font-size:26px}
+.letter-choice.selected{border-color:var(--grape);background:var(--bg);transform:translateY(-2px)}
 .letter-choice.right{border-color:var(--leaf);background:var(--leaf-soft)}
+.letter-choice.wrong{border-color:var(--coral);background:#fff0ee}
+.letter-submit{margin-top:10px;border:0;border-radius:15px;background:var(--grape);color:#fff;padding:10px 24px;font-size:18px;font-weight:600}
+.letter-submit:disabled{opacity:.4;cursor:not-allowed}
 .letter-feedback{min-height:25px;margin:8px 0 0;font-size:18px;font-weight:600;color:var(--grape)}
 .workout-list{display:grid;gap:9px}
 .move{width:100%;display:flex;align-items:center;gap:12px;border:3px solid var(--line);border-radius:18px;background:var(--bg);padding:10px 12px;text-align:left}
@@ -271,7 +275,7 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
   var unlocked=false, pinEntry="", pinBad=false;
   who=load("fp-who","daughter"); done=load("fp-done",{}); checkins=load("fp-checkin",{});
   var collapsed=load("fp-collapsed",{});
-  var workoutDone=load("fp-workout",{}), lessonOpen=false, letterPick="";
+  var workoutDone=load("fp-workout",{}), lessonOpen=false, letterPick="", letterSubmitted=false, speechRun=0;
   unlocked=(load("fp-unlock","")===state.pin);
   var local=load("fp-local",{});
   local.add=local.add||[];local.del=local.del||[];local.edit=local.edit||{};
@@ -297,7 +301,20 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
     if(!friendlyVoice)friendlyVoice=voices.filter(function(v){return /^en-US/i.test(v.lang)&&v.localService})[0]||voices.filter(function(v){return /^en/i.test(v.lang)})[0]||null;
     return friendlyVoice;
   }
-  function say(t){try{var u=new SpeechSynthesisUtterance(t),v=getFriendlyVoice();if(v)u.voice=v;u.rate=.76;u.pitch=1.08;u.volume=1;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
+  function say(t){
+    try{
+      var run=++speechRun,parts=String(t).match(/[^.!?]+[.!?]+|[^.!?]+$/g)||[t],i=0;
+      speechSynthesis.cancel();
+      function next(){
+        if(run!==speechRun||i>=parts.length)return;
+        var u=new SpeechSynthesisUtterance(parts[i++].trim()),v=getFriendlyVoice();
+        if(v)u.voice=v;u.rate=.76;u.pitch=1.08;u.volume=1;
+        u.onend=function(){if(run===speechRun)setTimeout(next,420)};
+        speechSynthesis.speak(u);
+      }
+      next();
+    }catch(e){}
+  }
   if(window.speechSynthesis)speechSynthesis.addEventListener("voiceschanged",function(){friendlyVoice=null;getFriendlyVoice()});
   function dayNumber(d){return Math.floor(new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime()/86400000)}
   function dailyLetter(d){return LETTERS[((dayNumber(d)%LETTERS.length)+LETTERS.length)%LETTERS.length]}
@@ -310,6 +327,7 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
     if(l==="U")return "This is big U and little u. U can say you, like unicorn. U can also say uh, like umbrella and up. Can you say U?";
     return "This is big "+l+" and little "+l.toLowerCase()+". The letter "+l+" says "+p[0]+", like "+p[1]+". Can you say "+l+"?";
   }
+  function letterQuestion(letter){return "Which picture starts with the letter "+letter[0]+"? Tap a picture to hear its name. Then press submit."}
   function dailyMoves(d){var n=dayNumber(d),out=[];for(var i=0;i<3;i++)out.push(EXERCISES[(n*2+i*3)%EXERCISES.length]);return out}
 
   function occurs(it,d){
@@ -418,10 +436,10 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
       +'<button class="letter-launch" data-letter-toggle="1" aria-expanded="'+lessonOpen+'"><span class="letter-badge">'+letter[0]+'<small>'+letter[0].toLowerCase()+'</small></span><span><strong>'+letter[0]+' '+letter[0].toLowerCase()+' is for '+letter[1]+'</strong><small>Tap for a mini lesson!</small></span></button>';
     if(lessonOpen){
       h+='<div class="lesson"><div class="lesson-word"><span class="big">'+letter[2]+'</span>'+letter[0]+' '+letter[0].toLowerCase()+' is for '+letter[1]+'</div>'
-        +'<p>'+esc(phonicsLine(letter))+'</p><button class="sound-btn" data-say="'+esc(phonicsLine(letter))+'">🔊 Hear the letter</button>'
-        +'<div class="letter-game"><p>Which picture starts with '+letter[0]+'?</p><div class="letter-choices">';
-      choices.forEach(function(ch){h+='<button class="letter-choice'+(letterPick&&ch[0]===letter[0]?" right":"")+'" data-letter-choice="'+ch[0]+'" aria-label="'+esc(ch[1])+'">'+ch[2]+'</button>'});
-      h+='</div><div class="letter-feedback" aria-live="polite">'+(letterPick?(letterPick===letter[0]?"🎉 Yes! "+letter[1]+" starts with "+letter[0]+"!":"Almost—listen to the sound and try again!"):"Pick one!")+'</div></div></div>';
+        +'<p>'+esc(phonicsLine(letter))+'</p><button class="sound-btn" data-say="'+esc(phonicsLine(letter)+' '+letterQuestion(letter))+'">🔊 Hear the lesson</button>'
+        +'<div class="letter-game"><p>'+esc(letterQuestion(letter))+' <button class="mini-say" data-say="'+esc(letterQuestion(letter))+'" aria-label="Hear the question">🔊</button></p><div class="letter-choices">';
+      choices.forEach(function(ch){var picked=letterPick===ch[0],right=letterSubmitted&&picked&&ch[0]===letter[0],wrong=letterSubmitted&&picked&&ch[0]!==letter[0];h+='<button class="letter-choice'+(picked?" selected":"")+(right?" right":"")+(wrong?" wrong":"")+'" data-letter-choice="'+ch[0]+'" aria-pressed="'+picked+'" aria-label="'+esc(ch[1])+'">'+ch[2]+'</button>'});
+      h+='</div><button class="letter-submit" data-letter-submit="1"'+(letterPick?'':' disabled')+'>Submit answer</button><div class="letter-feedback" aria-live="polite">'+(letterSubmitted?(letterPick===letter[0]?"🎉 Yes! "+letter[1]+" starts with "+letter[0]+"!":"Almost—listen again and choose another picture!"):(letterPick?"You picked "+LETTERS.filter(function(x){return x[0]===letterPick})[0][1]+". Press submit when you’re ready!":"Tap each picture to hear its name."))+'</div></div></div>';
     }
     h+='</section><section class="fun-card"><div class="fun-head"><h2>💪 Morning workout</h2><span>'+moveCount+'/3</span></div><div class="workout-list">';
     moves.forEach(function(m){var mk=wk+":"+m[0], mDone=!!workoutDone[mk];h+='<button class="move'+(mDone?" done":"")+'" data-workout="'+esc(mk)+'" aria-pressed="'+mDone+'"><span class="move-emoji">'+m[1]+'</span><span><strong>'+m[2]+'</strong><small>'+m[3]+'</small></span><span class="move-check" aria-hidden="true"></span></button>'});
@@ -674,9 +692,11 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
     var ce=t.closest("[data-ciedit]");
     if(ce){ciEdit=ce.getAttribute("data-ciedit")==="1";render();return}
     var lt=t.closest("[data-letter-toggle]");
-    if(lt&&!sheetOpen){lessonOpen=!lessonOpen;letterPick="";render();return}
+    if(lt&&!sheetOpen){lessonOpen=!lessonOpen;letterPick="";letterSubmitted=false;render();if(lessonOpen){var openLetter=dailyLetter(viewDate());say(phonicsLine(openLetter)+" "+letterQuestion(openLetter))}return}
     var lc=t.closest("[data-letter-choice]");
-    if(lc&&!sheetOpen){letterPick=lc.getAttribute("data-letter-choice");var dl=dailyLetter(viewDate());say(letterPick===dl[0]?"Yes! "+dl[1]+" starts with "+dl[0]:"Almost. Try again.");render();return}
+    if(lc&&!sheetOpen){letterPick=lc.getAttribute("data-letter-choice");letterSubmitted=false;var pickedLetter=LETTERS.filter(function(x){return x[0]===letterPick})[0];say(pickedLetter[1]+".");render();return}
+    var ls=t.closest("[data-letter-submit]");
+    if(ls&&!sheetOpen){var dl=dailyLetter(viewDate());if(!letterPick){say("Choose a picture first.");return}letterSubmitted=true;say(letterPick===dl[0]?"Yes! "+dl[1]+" starts with the letter "+dl[0]+". Great listening!":"Almost. Listen to the letter sound, and try another picture.");render();return}
     var wo=t.closest("[data-workout]");
     if(wo&&!sheetOpen){var wk2=wo.getAttribute("data-workout");if(workoutDone[wk2])delete workoutDone[wk2];else workoutDone[wk2]=1;save("fp-workout",workoutDone);render();return}
     var em=t.closest("[data-emo]");
