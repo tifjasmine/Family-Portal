@@ -454,7 +454,7 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
 
     var tasks=jobs(who,d), n=tasks.filter(function(x){return done[x.key]}).length;
     h+='<div class="a-wrap"><div>';
-    h+='<div class="a-card"><div class="a-head"><h2>Tasks</h2><button class="btn main sm" data-act="add">+ Add task</button></div><div class="a-prog"><span>'+n+' of '+tasks.length+' done</span><div class="bar"><i style="width:'+(tasks.length?Math.round(100*n/tasks.length):0)+'%"></i></div></div>';
+    h+='<div class="a-card"><div class="a-head"><h2>Tasks</h2><button class="btn main sm" data-act="add-task">+ Add task</button></div><div class="a-prog"><span>'+n+' of '+tasks.length+' done</span><div class="bar"><i style="width:'+(tasks.length?Math.round(100*n/tasks.length):0)+'%"></i></div></div>';
     if(!tasks.length)h+='<p class="note" style="margin-top:12px">Nothing scheduled for this day.</p>';
     ["Morning","Afternoon","Evening","Anytime"].forEach(function(s){
       var g=tasks.filter(function(x){return x.slot===s});
@@ -471,9 +471,11 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
 
     var mine=plans(who,d);
     if(mine.length){
-      h+='<div class="a-card"><h2>Schedule</h2>';
+      h+='<div class="a-card"><div class="a-head"><h2>Calendar</h2><button class="btn main sm" data-act="add-plan">+ Add calendar item</button></div>';
       mine.forEach(function(x){h+='<div class="kv"><span>'+(x.slot==="Anytime"?"Any time":x.slot)+'</span><span>'+esc(x.it.title)+'</span></div>'});
       h+='</div>';
+    } else {
+      h+='<div class="a-card"><div class="a-head"><h2>Calendar</h2><button class="btn main sm" data-act="add-plan">+ Add calendar item</button></div><p class="note">Nothing scheduled for this day.</p></div>';
     }
     h+='</div><div>';
 
@@ -550,17 +552,15 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
     if(editing){
       var it=editing, r=it.repeat||{kind:"daily"};
       h+='<h3>'+(it._new?"Add something":"Edit")+'</h3><div class="form">';
-      if((it.who||[]).indexOf("daughter")>-1)h+='<label>Picture for Kaiya’s screen (type or paste an emoji)</label><input type="text" id="f-emoji" maxlength="12" value="'+esc(it.emoji)+'">';
+      h+='<label>Picture or emoji</label><input type="text" id="f-emoji" maxlength="12" value="'+esc(it.emoji)+'">';
       h+='<label>Name</label><input type="text" id="f-title" value="'+esc(it.title)+'">';
-      h+='<label>Who sees it</label><div class="chips">';
-      PEOPLE.forEach(function(p){h+='<button class="chip" data-f="who" data-v="'+p.id+'" aria-pressed="'+((it.who||[]).indexOf(p.id)>-1)+'">'+p.name+'</button>'});
-      h+='</div><label>Kind</label><div class="chips">'
-        +'<button class="chip" data-f="type" data-v="task" aria-pressed="'+(it.type!=="plan")+'">Task to check off</button>'
-        +'<button class="chip" data-f="type" data-v="plan" aria-pressed="'+(it.type==="plan")+'">Schedule item (not checked)</button></div>';
-      h+='<label>How often</label><select id="f-kind"><option value="daily"'+(r.kind==="daily"?" selected":"")+'>Every day</option><option value="days"'+(r.kind==="days"?" selected":"")+'>Certain days of the week</option><option value="date"'+(r.kind==="date"?" selected":"")+'>One date only</option></select>';
+      h+='<label>Who</label><select id="f-who">';
+      PEOPLE.forEach(function(p){h+='<option value="'+p.id+'"'+(((it.who||[])[0]||who)===p.id?' selected':'')+'>'+p.name+'</option>'});
+      h+='</select><label>Goes on</label><select id="f-type"><option value="task"'+(it.type!=="plan"?' selected':'')+'>Tasks — can be checked off</option><option value="plan"'+(it.type==="plan"?' selected':'')+'>Calendar / My Day</option></select>';
+      h+='<label>One-time or recurring?</label><select id="f-kind"><option value="daily"'+(r.kind==="daily"?" selected":"")+'>Recurring — every day</option><option value="days"'+(r.kind==="days"?" selected":"")+'>Recurring — selected weekdays</option><option value="date"'+(r.kind==="date"?" selected":"")+'>One-time — selected date</option></select>';
       if(r.kind==="days"){h+='<label>Which days</label><div class="chips">';DOW.forEach(function(nm,i){h+='<button class="chip" data-f="day" data-v="'+i+'" aria-pressed="'+((r.days||[]).indexOf(i)>-1)+'">'+nm+'</button>'});h+='</div>'}
       if(r.kind==="date")h+='<label>Date</label><input type="date" id="f-date" value="'+esc(r.date||iso(viewDate()))+'">';
-      h+='<label>Time of day (pick two for "2 times a day"; none = any time)</label><div class="chips">';
+      h+='<label>Time of day (choose more than one if needed)</label><div class="chips">';
       SLOTS.forEach(function(s){h+='<button class="chip" data-f="slot" data-v="'+s+'" aria-pressed="'+((it.slots||[]).indexOf(s)>-1)+'">'+s+'</button>'});
       h+='</div></div><div class="actions">'
         +(it._new?'':'<button class="btn bad" data-act="delete">'+(confirmDel?'Tap again to delete':'Delete')+'</button>')
@@ -574,7 +574,7 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
           +'<button class="btn" data-act="edit" data-id="'+esc(it.id)+'">Edit</button></div>';
       });
       h+='<div class="form"><label>PIN to open the Portal on this device (3 to 8 numbers)</label><div style="display:flex;gap:8px"><input type="text" id="f-pin" inputmode="numeric" maxlength="8" value="'+esc(state.pin)+'"><button class="btn main" data-act="setpin">Set PIN</button></div></div>';
-      h+='<div class="actions"><button class="btn main" data-act="add">Add something</button>'
+      h+='<div class="actions"><button class="btn main" data-act="add-task">Add task</button><button class="btn main" data-act="add-plan">Add calendar item</button>'
         +'<button class="btn" data-act="lock">Lock now</button><button class="btn" data-act="reset-today">Uncheck today</button><button class="btn" data-act="close">Close</button></div>';
     }
     if(sheetMsg)h+='<p class="msg">'+esc(sheetMsg)+'</p>';
@@ -582,9 +582,11 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
   }
   function readForm(){
     if(!editing)return;
-    var e=document.getElementById("f-emoji"),t=document.getElementById("f-title"),k=document.getElementById("f-kind"),dt=document.getElementById("f-date");
+    var e=document.getElementById("f-emoji"),t=document.getElementById("f-title"),k=document.getElementById("f-kind"),dt=document.getElementById("f-date"),fw=document.getElementById("f-who"),ft=document.getElementById("f-type");
     if(e)editing.emoji=e.value.trim()||"⭐";
     if(t)editing.title=t.value;
+    if(fw)editing.who=[fw.value];
+    if(ft)editing.type=ft.value;
     if(k){
       var kind=k.value, r=editing.repeat||{};
       if(kind!==r.kind){editing.repeat=kind==="days"?{kind:"days",days:[1,2,3,4,5]}:kind==="date"?{kind:"date",date:iso(viewDate())}:{kind:"daily"}}
@@ -697,7 +699,7 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
     if(a){
       var act=a.getAttribute("data-act");
       if(act==="close"){sheetOpen=false;editing=null;sheetMsg="";render()}
-      else if(act==="add"){editFromList=sheetOpen;sheetOpen=true;confirmDel=false;editing={_new:true,id:"i"+Date.now().toString(36),title:"",emoji:"⭐",who:[who],type:"task",repeat:{kind:"daily"},slots:[]};sheetMsg="";render()}
+      else if(act==="add-task"||act==="add-plan"){editFromList=sheetOpen;sheetOpen=true;confirmDel=false;editing={_new:true,id:"i"+Date.now().toString(36),title:"",emoji:act==="add-plan"?"📅":"⭐",who:[who],type:act==="add-plan"?"plan":"task",repeat:act==="add-plan"?{kind:"date",date:iso(viewDate())}:{kind:"daily"},slots:[]};sheetMsg="";render()}
       else if(act==="edit"){editFromList=sheetOpen;sheetOpen=true;confirmDel=false;var eid=a.getAttribute("data-id");editing=JSON.parse(JSON.stringify(items().filter(function(x){return x.id===eid})[0]));sheetMsg="";render()}
       else if(act==="lock"){save("fp-unlock","");unlocked=false;sheetOpen=false;editing=null;pinEntry="";render()}
       else if(act==="setpin"){
@@ -723,6 +725,9 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
       return;
     }
     if(t.id==="sheet"){sheetOpen=false;editing=null;render()}
+  });
+  app.addEventListener("change",function(ev){
+    if(editing&&(ev.target.id==="f-kind"||ev.target.id==="f-type")){readForm();render()}
   });
 
   var lastDay=iso(new Date());
