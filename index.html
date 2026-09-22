@@ -253,13 +253,12 @@ body[data-mode="kid"] .reward-card{background:#e9ddf7;color:var(--ink);border:1p
 body[data-mode="kid"] .reward-track{background:#d5c1ea}
 body[data-mode="kid"] .kid-day[aria-current="true"]{background:var(--grape);color:white}
 body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
-.kid-tabs{display:flex;gap:10px;margin:0 0 20px}.kid-tab{flex:1;border:2px solid #d9c3f1;background:var(--paper);border-radius:99px;padding:12px 16px;font-weight:800;font-size:18px}.kid-tab[aria-pressed="true"]{background:var(--grape);color:#fff;border-color:var(--grape)}
 .week-details{margin-bottom:16px}.week-details summary{cursor:pointer;font-weight:800;color:var(--muted);padding:8px 2px}.week-details .kid-week{margin-top:10px}.all-jobs-toggle{width:100%;border:2px solid var(--line);background:var(--paper);border-radius:20px;padding:14px;font-weight:800;font-size:18px;margin:0 0 16px}
-.hello-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-bottom:18px}.hello-grid .card-k,.hello-grid .fun-card{margin:0;min-width:0}.hello-grid .strip{max-width:100%}.hello-grid .card-k:last-child{grid-column:1/-1}
-.learning-link{border:0;border-radius:99px;background:#e9ddf7;padding:10px 20px;font-weight:800}
-.kid-cta{display:block;width:100%;border:0;border-radius:24px;background:var(--grape);color:white;font-size:24px;font-weight:800;padding:19px 20px;margin:0 0 22px;box-shadow:0 6px 0 #7957b3}
-.job-hero{display:grid;grid-template-columns:auto 1fr;gap:12px 18px;align-items:center;background:#e9ddf7;border:1px solid #d9c3f1;border-radius:30px;padding:22px;margin:0 0 18px}.job-hero .hero-pic{font-size:72px;line-height:1}.job-hero h2{margin:2px 0;font-size:clamp(28px,5vw,42px)}.job-hero .hero-label{font-weight:800;color:#6b4a9c;text-transform:uppercase;letter-spacing:.09em}.hero-actions{grid-column:1/-1;display:flex;gap:10px}.hero-actions button{flex:1;border:0;border-radius:18px;padding:14px;font-size:20px;font-weight:800;background:var(--paper)}.hero-actions button:last-child{background:var(--leaf);color:#fff}.next-jobs{background:var(--paper);border:1px solid var(--line);border-radius:26px;padding:18px;margin-bottom:18px}.next-jobs h2{margin:0 0 12px}.next-jobs div{font-size:20px;padding:6px 0}.job-path{display:flex;gap:8px;overflow-x:auto;margin-bottom:18px}.job-path button{min-width:64px;border:2px solid var(--line);background:var(--paper);border-radius:18px;padding:9px;font-size:30px}.job-path button.done{background:var(--leaf-soft);border-color:var(--leaf)}
-@media(max-width:680px){.hello-grid{grid-template-columns:1fr}.hello-grid .card-k:last-child{grid-column:auto}.kid-tabs{position:sticky;top:0;z-index:5;background:var(--bg);padding:8px 0}.job-hero .hero-pic{font-size:58px}}
+.section-head{margin:28px 2px 12px;font-size:24px;line-height:1.15}.section-head small{display:block;font:600 15px "Figtree",sans-serif;color:var(--muted);margin-top:3px}
+.activity-grid,.day-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-bottom:18px;align-items:stretch}.activity-grid .card-k,.activity-grid .fun-card,.day-grid .card-k,.day-grid .reward-card{margin:0;min-width:0}.day-grid{grid-template-columns:minmax(0,1.5fr) minmax(260px,.8fr)}.day-grid .strip{max-width:100%}
+.up-next{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 18px;padding:12px 16px;background:var(--paper);border:1px solid var(--line);border-radius:20px}.up-next strong{color:var(--muted);margin-right:4px}.up-next span{padding:7px 11px;border-radius:99px;background:var(--bg);font-weight:700}
+.job-hero{display:grid;grid-template-columns:auto 1fr;gap:12px 18px;align-items:center;background:#e9ddf7;border:1px solid #d9c3f1;border-radius:30px;padding:22px;margin:0 0 18px}.job-hero .hero-pic{font-size:72px;line-height:1}.job-hero h2{margin:2px 0;font-size:clamp(28px,5vw,42px)}.job-hero .hero-label{font-weight:800;color:#6b4a9c;text-transform:uppercase;letter-spacing:.09em}.hero-actions{grid-column:1/-1;display:flex;gap:10px}.hero-actions button{flex:1;border:0;border-radius:18px;padding:14px;font-size:20px;font-weight:800;background:var(--paper)}.hero-actions button:last-child{background:var(--leaf);color:#fff}
+@media(max-width:680px){.activity-grid,.day-grid{grid-template-columns:1fr}.job-hero .hero-pic{font-size:58px}.section-head{font-size:22px}.up-next span{font-size:14px}}
 </style>
 </head>
 <body data-mode="kid">
@@ -354,7 +353,7 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
   var discovered=load("fp-discovered",{});
   var reward=load("fp-reward",{stars:0,goal:20,prize:"Choose a special treat!"});
   reward.stars=Math.max(0,+reward.stars||0);reward.goal=Math.max(1,+reward.goal||20);reward.prize=reward.prize||"Choose a special treat!";
-  var kidScreen=load("fp-kid-screen-v2","jobs"), showAllJobs=false;
+  var showAllJobs=false;
   unlocked=(sessionStorage.getItem("fp-unlock")===state.pin);
   var local=load("fp-local",{});
   local.add=local.add||[];local.del=local.del||[];local.edit=local.edit||{};
@@ -488,19 +487,18 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
   function kidView(d){
     var h="", c=checkins[iso(d)]||{};
     var emo=null;EMOTIONS.forEach(function(e){if(e[0]===c.feel)emo=e});
-    var y=dayAt(-1), t=dayAt(1);
+    var y=new Date(d);y.setDate(d.getDate()-1);var t=new Date(d);t.setDate(d.getDate()+1);
 
     h+='<div class="dayline"><div><h1>Hi, Kaiya! 👋</h1><div class="sub">'+DOWLONG[d.getDay()]+', '+MONTHS[d.getMonth()]+' '+d.getDate()+'</div></div></div>';
-    h+='<div class="kid-tabs"><button class="kid-tab" data-kid-screen="jobs" aria-pressed="'+(kidScreen==='jobs')+'">✅ Start here</button><button class="kid-tab" data-kid-screen="hello" aria-pressed="'+(kidScreen==='hello')+'">🔤 Learn & play</button></div>';
     var weekStart=new Date(d);weekStart.setDate(d.getDate()-d.getDay());
-    if(kidScreen==='hello')h+='<details class="week-details"><summary>📅 See this week</summary><div class="kid-week" aria-label="Choose a day this week">';
+    var week='<details class="week-details"><summary>📅 See this week</summary><div class="kid-week" aria-label="Choose a day this week">';
     for(var wi=0;wi<7;wi++){
       var wd=new Date(weekStart);wd.setDate(weekStart.getDate()+wi);var woff=Math.round((wd-dayAt(0))/864e5),wplans=plans("daughter",wd);
-      if(kidScreen==='hello')h+='<button class="kid-day" data-goto="'+woff+'" aria-current="'+(iso(wd)===iso(d))+'">'+DOW[wi]+'<b>'+wd.getDate()+'</b><span>'+wplans.map(function(x){return x.it.emoji}).join('')+'</span></button>';
+      week+='<button class="kid-day" data-goto="'+woff+'" aria-current="'+(iso(wd)===iso(d))+'">'+DOW[wi]+'<b>'+wd.getDate()+'</b><span>'+wplans.map(function(x){return x.it.emoji}).join('')+'</span></button>';
     }
-    if(kidScreen==='hello')h+='</div></details>';
+    week+='</div></details>';
     var rewardWon=reward.stars>=reward.goal,rewardPct=Math.min(100,Math.round(100*reward.stars/reward.goal));
-    if(kidScreen==='hello')h+='<div class="reward-card'+(rewardWon?' won':'')+'"><div class="reward-star">'+(rewardWon?'🏆':'⭐')+'</div><div><h2>'+(rewardWon?'You earned your prize!':reward.stars+' of '+reward.goal+' stars')+'</h2><p>'+(rewardWon?esc(reward.prize):'Keep going! Your prize is: '+esc(reward.prize))+'</p></div><div class="reward-track"><i style="width:'+rewardPct+'%"></i></div></div>';
+    var rewardCard='<div class="reward-card'+(rewardWon?' won':'')+'"><div class="reward-star">'+(rewardWon?'🏆':'⭐')+'</div><div><h2>'+(rewardWon?'You earned your prize!':reward.stars+' of '+reward.goal+' stars')+'</h2><p>'+(rewardWon?esc(reward.prize):'Keep going! Your prize is: '+esc(reward.prize))+'</p></div><div class="reward-track"><i style="width:'+rewardPct+'%"></i></div></div>';
 
     // check-in (collapses once it is finished)
     var complete=!!(emo&&c.day!=null), showFull=!complete||ciEdit, ci="";
@@ -511,13 +509,16 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
         +'<button class="btn" data-ciedit="1">Change</button></div></div>';
     } else {
       ci='<div class="card-k"><h2>My check-in</h2>';
-      ci+='<div class="ci-row"><div class="ci-say">Today I feel <span class="ci-pick">'+(emo?emo[1]+' '+emo[2]:'❓')+'</span></div><div class="emos">';
-      EMOTIONS.forEach(function(e){ci+='<button class="emo" data-emo="'+e[0]+'" aria-pressed="'+(c.feel===e[0])+'"><span class="e">'+e[1]+'</span>'+e[2]+'</button>'});
-      ci+='</div></div>';
-      ci+='<div class="ci-row"><div class="ci-say">Yesterday was <span class="ci-pick fixed">'+DOWLONG[y.getDay()]+'</span><button class="mini-say" data-say="Yesterday was '+DOWLONG[y.getDay()]+'" aria-label="Hear it">🔊</button></div></div>';
-      ci+='<div class="ci-row"><div class="ci-say">Today is <span class="ci-pick">'+(c.day!=null?DOWLONG[c.day]+' ✅':'❓')+'</span></div><div class="days">';
-      DOWLONG.forEach(function(nm,i){ci+='<button class="dchip'+(shakeIdx===i?" shake":"")+'" data-guess="'+i+'" aria-pressed="'+(c.day===i)+'">'+nm+'</button>'});
-      ci+='</div>'+(shakeIdx!=null?'<p class="hint">Not quite. Try again! 🤔</p>':'')+'</div>';
+      ci+='<div class="ci-row"><div class="ci-say">Today I feel <span class="ci-pick">'+(emo?emo[1]+' '+emo[2]:'❓')+'</span></div>';
+      if(!emo||ciEdit){ci+='<div class="emos">';EMOTIONS.forEach(function(e){ci+='<button class="emo" data-emo="'+e[0]+'" aria-pressed="'+(c.feel===e[0])+'"><span class="e">'+e[1]+'</span>'+e[2]+'</button>'});ci+='</div>'}
+      else ci+='<button class="btn" data-ciedit="1">Change feeling</button>';
+      ci+='</div>';
+      if(emo){
+        ci+='<div class="ci-row"><div class="ci-say">Yesterday was <span class="ci-pick fixed">'+DOWLONG[y.getDay()]+'</span><button class="mini-say" data-say="Yesterday was '+DOWLONG[y.getDay()]+'" aria-label="Hear it">🔊</button></div></div>';
+        ci+='<div class="ci-row"><div class="ci-say">Today is <span class="ci-pick">'+(c.day!=null?DOWLONG[c.day]+' ✅':'❓')+'</span></div><div class="days">';
+        DOWLONG.forEach(function(nm,i){ci+='<button class="dchip'+(shakeIdx===i?" shake":"")+'" data-guess="'+i+'" aria-pressed="'+(c.day===i)+'">'+nm+'</button>'});
+        ci+='</div>'+(shakeIdx!=null?'<p class="hint">Not quite. Try again! 🤔</p>':'')+'</div>';
+      } else ci+='<p class="msg">Choose a feeling, then we’ll find today’s day.</p>';
       if(complete)ci+='<div class="actions"><button class="btn main" data-ciedit="0">Done</button></div>';
       ci+='</div>';
     }
@@ -541,7 +542,6 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
     var workout='<section class="fun-card"><div class="fun-head"><h2>💪 Morning workout</h2><span>'+moveCount+'/3</span></div><div class="workout-list">';
     moves.forEach(function(m){var mk=wk+":"+m[0], mDone=!!workoutDone[mk];workout+='<button class="move'+(mDone?" done":"")+'" data-workout="'+esc(mk)+'" aria-pressed="'+mDone+'"><span class="move-emoji">'+m[1]+'</span><span><strong>'+m[2]+'</strong><small>'+m[3]+'</small></span><span class="move-check" aria-hidden="true"></span></button>'});
     workout+='</div>'+(moveCount===3?'<p class="workout-cheer">Amazing! Your body is ready! 🌟</p>':'')+'</section>';
-    if(kidScreen==='hello')h+='<div class="hello-grid">'+ci+workout+md+'</div>';
 
     // playful daily learning and movement
     var letter=dailyLetter(d), li=LETTERS.indexOf(letter), choices=[letter,LETTERS[(li+8)%26],LETTERS[(li+17)%26]];
@@ -564,7 +564,6 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
       fun+='<div class="discovery-content"><span class="big">'+esc(discovery.entry.emoji)+'</span><strong>Did you know?</strong><div>'+esc(discovery.entry.fact)+'</div><div class="discovery-try"><strong>🌟 Try it!</strong>'+esc(discovery.entry.try)+'</div><div class="discovery-actions"><button class="sound-btn" data-audio="audio/discoveries/'+discovery.theme.key+'-'+discovery.day+'.mp3" data-fallback="'+esc(discovery.entry.fact+' '+discovery.entry.try)+'">🔊 Tell me!</button></div></div>';
     }
     fun+='</section></div>';
-    if(kidScreen==='hello')return h+fun+'<button class="kid-cta" data-kid-screen="jobs">Go to my jobs →</button>';
 
     // jobs: layout adapts to how many there are
     var tasks=jobs("daughter",d), n=tasks.filter(function(x){return done[x.key]}).length, total=tasks.length;
@@ -572,9 +571,11 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
     if(next){
       h+='<div class="job-hero"><span class="hero-pic">'+esc(next.it.emoji)+'</span><div><span class="hero-label">Start with this · '+esc(next.slot)+'</span><h2>'+esc(next.it.title)+'</h2><span>⭐ '+reward.stars+' of '+reward.goal+' stars</span></div><div class="hero-actions"><button data-say="'+esc(next.it.title)+'">🔊 Hear it</button><button data-key="'+esc(next.key)+'">✓ I did it!</button></div></div>';
       var upcoming=tasks.filter(function(x){return !done[x.key]&&x.key!==next.key}).slice(0,3);
-      if(upcoming.length){h+='<div class="next-jobs"><h2>Then...</h2>';upcoming.forEach(function(x){h+='<div>'+esc(x.it.emoji)+' '+esc(x.it.title)+'</div>'});h+='</div>'}
+      if(upcoming.length){h+='<div class="up-next"><strong>Up next</strong>';upcoming.forEach(function(x){h+='<span>'+esc(x.it.emoji)+' '+esc(x.it.title)+'</span>'});h+='</div>'}
     }
-    h+='<div class="next-jobs"><h2>🌟 Ready for a brain break?</h2><div>Today’s letter is '+letter[0]+' '+letter[0].toLowerCase()+'.</div><button class="learning-link" data-kid-screen="hello">Learn & play →</button></div>';
+    h+='<h2 class="section-head">😊 Check in & move<small>How do you feel? Then wake up your body.</small></h2><div class="activity-grid">'+ci+workout+'</div>';
+    h+='<h2 class="section-head">🔤 Learn something new<small>A quick letter lesson and a fun discovery.</small></h2>'+fun;
+    h+='<h2 class="section-head">📅 Today & my stars<small>Your plans and the prize you’re working toward.</small></h2><div class="day-grid">'+md+rewardCard+'</div>'+week;
     var dens=total<=5?"xl":total<=8?"l":total<=13?"m":"s";
     var slotsUsed=["Morning","Afternoon","Evening","Anytime"].filter(function(s){return tasks.some(function(x){return x.slot===s})});
     if(total&&n===total)h+='<div class="cheer"><span class="big">🎉⭐🎉</span>All done! Great job, Kaiya!</div>';
@@ -816,8 +817,6 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
     if(sy){ev.stopPropagation();say(sy.getAttribute("data-say"));return}
     var au=t.closest("[data-audio]");
     if(au&&!au.hasAttribute("data-letter-choice")){ev.stopPropagation();playClip(au.getAttribute("data-audio"),au.getAttribute("data-fallback"));return}
-    var ks=t.closest("[data-kid-screen]");
-    if(ks&&!sheetOpen){kidScreen=ks.getAttribute("data-kid-screen");save("fp-kid-screen-v2",kidScreen);render();window.scrollTo(0,0);return}
     var aj=t.closest("[data-all-jobs]");
     if(aj&&!sheetOpen){showAllJobs=!showAllJobs;render();return}
     var p=t.closest("[data-who]");
@@ -842,6 +841,7 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
     if(em&&!sheetOpen){
       var id=em.getAttribute("data-emo"),k1=iso(viewDate());
       checkins[k1]=checkins[k1]||{};checkins[k1].feel=id;save("fp-checkin",checkins);
+      ciEdit=false;
       EMOTIONS.forEach(function(e){if(e[0]===id)say("I feel "+e[2])});
       render();return;
     }
