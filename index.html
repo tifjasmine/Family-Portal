@@ -245,6 +245,7 @@ body[data-mode="kid"]{--bg:#f5ead8;--paper:#fffaf1;--ink:#29241f;--muted:#72675d
 body[data-mode="kid"] h1,body[data-mode="kid"] h2,body[data-mode="kid"] .ghead-title{font-family:"Caprasimo","Fredoka",sans-serif;font-weight:400}
 body[data-mode="kid"] .person,body[data-mode="kid"] .gear,body[data-mode="kid"] .card-k,body[data-mode="kid"] .fun-card,body[data-mode="kid"] .gcard{box-shadow:0 7px 24px rgba(91,65,44,.07)}
 body[data-mode="kid"] .person{border-width:2px;border-color:var(--line);font-size:15px;border-radius:22px}
+body[data-mode="kid"] .person{flex-direction:row;justify-content:center;gap:6px;padding:7px 8px}body[data-mode="kid"] .person .face svg{width:35px;height:35px}
 body[data-mode="kid"] .person[aria-pressed="true"]{border-color:var(--grape)}
 body[data-mode="kid"] .dayline h1{font-size:clamp(34px,6vw,58px)}
 body[data-mode="kid"] .card-k,body[data-mode="kid"] .fun-card{border:1px solid var(--line)}
@@ -253,6 +254,7 @@ body[data-mode="kid"] .reward-track{background:#d5c1ea}
 body[data-mode="kid"] .kid-day[aria-current="true"]{background:var(--grape);color:white}
 body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
 .kid-tabs{display:flex;gap:10px;margin:0 0 20px}.kid-tab{flex:1;border:2px solid #d9c3f1;background:var(--paper);border-radius:99px;padding:12px 16px;font-weight:800;font-size:18px}.kid-tab[aria-pressed="true"]{background:var(--grape);color:#fff;border-color:var(--grape)}
+.week-details{margin-bottom:16px}.week-details summary{cursor:pointer;font-weight:800;color:var(--muted);padding:8px 2px}.week-details .kid-week{margin-top:10px}.all-jobs-toggle{width:100%;border:2px solid var(--line);background:var(--paper);border-radius:20px;padding:14px;font-weight:800;font-size:18px;margin:0 0 16px}
 .hello-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-bottom:18px}.hello-grid .card-k,.hello-grid .fun-card{margin:0;min-width:0}.hello-grid .strip{max-width:100%}.hello-grid .card-k:last-child{grid-column:1/-1}
 .learning-link{border:0;border-radius:99px;background:#e9ddf7;padding:10px 20px;font-weight:800}
 .kid-cta{display:block;width:100%;border:0;border-radius:24px;background:var(--grape);color:white;font-size:24px;font-weight:800;padding:19px 20px;margin:0 0 22px;box-shadow:0 6px 0 #7957b3}
@@ -329,15 +331,7 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
   var LETTERS=[
     ["A","apple","🍎",""],["B","ball","⚽",""],["C","cat","🐱",""],["D","dog","🐶",""],["E","egg","🥚",""],["F","fish","🐟",""],["G","goat","🐐",""],["H","hat","🎩",""],["I","igloo","🧊",""],["J","jellyfish","🪼",""],["K","kite","🪁",""],["L","lion","🦁",""],["M","moon","🌙",""],["N","nest","🪺",""],["O","octopus","🐙",""],["P","pig","🐷",""],["Q","queen","👑",""],["R","rainbow","🌈",""],["S","sun","☀️",""],["T","turtle","🐢",""],["U","umbrella","☂️",""],["V","violin","🎻",""],["W","whale","🐋",""],["X","fox","🦊",""],["Y","yo-yo","🪀",""],["Z","zebra","🦓",""]
   ];
-  var PHONICS={
-    A:["ay or ah","acorn, apple, and ant"],B:["buh","ball, bear, and banana"],C:["kuh","cat, car, and cup"],D:["duh","dog, duck, and drum"],
-    E:["ee or eh","eagle, egg, and elephant"],F:["fff","fish, fox, and flower"],G:["guh","goat, game, and grapes"],H:["huh","hat, horse, and house"],
-    I:["eye or ih","ice cream, igloo, and insect"],J:["juh","jellyfish, jar, and jump"],K:["kuh","kite, king, and kitten"],L:["lll","lion, leaf, and lamp"],
-    M:["mmm","moon, mouse, and milk"],N:["nnn","nest, nose, and night"],O:["oh or ah","ocean, octopus, and olive"],P:["puh","pig, pizza, and penguin"],
-    Q:["kwuh","queen, quilt, and quiet"],R:["rrr","rainbow, rabbit, and ring"],S:["sss","sun, sock, and snake"],T:["tuh","turtle, tiger, and tree"],
-    U:["you or uh","unicorn, umbrella, and up"],V:["vuh","violin, van, and volcano"],W:["wuh","whale, wagon, and window"],X:["ks","fox, box, and six"],
-    Y:["yuh","yo-yo, yarn, and yellow"],Z:["zzz","zebra, zipper, and zoo"]
-  };
+  var SOUND_PAIRS={A:["apple","ant"],B:["ball","bear"],C:["cat","cup"],D:["dog","duck"],E:["egg","elephant"],F:["fish","fox"],G:["goat","grapes"],H:["hat","horse"],I:["igloo","insect"],J:["jellyfish","jump"],K:["kite","kitten"],L:["lion","leaf"],M:["moon","mouse"],N:["nest","nose"],O:["octopus","olive"],P:["pig","pizza"],Q:["queen","quilt"],R:["rainbow","rabbit"],S:["sun","sock"],T:["turtle","tiger"],U:["umbrella","up"],V:["van","violin"],W:["whale","wagon"],X:["fox","box"],Y:["yo-yo","yarn"],Z:["zebra","zipper"]};
   var EXERCISES=[
     ["jump","⭐","Star jumps","5 jumps"],["march","🥁","March in place","10 steps"],["stretch","🌳","Reach up tall","Count to 5"],["balance","🦩","Flamingo balance","5 seconds each foot"],["squat","🪑","Chair squats","5 squats"],["twist","🌪️","Side-to-side twists","10 twists"],["toe","👟","Touch your toes","5 times"],["arms","✈️","Airplane arms","Count to 10"],["hop","🐰","Bunny hops","5 hops"]
   ];
@@ -354,12 +348,13 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
   function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
   var unlocked=false, pinEntry="", pinBad=false;
   who=load("fp-who","daughter"); done=load("fp-done",{}); checkins=load("fp-checkin",{});
+  var completionPending=load("fp-completion-pending",{}), completionQueues={}, completionError="";
   var collapsed=load("fp-collapsed",{});
   var workoutDone=load("fp-workout",{}), lessonOpen=false, letterPick="", letterSubmitted=false;
   var discovered=load("fp-discovered",{});
   var reward=load("fp-reward",{stars:0,goal:20,prize:"Choose a special treat!"});
   reward.stars=Math.max(0,+reward.stars||0);reward.goal=Math.max(1,+reward.goal||20);reward.prize=reward.prize||"Choose a special treat!";
-  var kidScreen=load("fp-kid-screen","hello");
+  var kidScreen=load("fp-kid-screen-v2","jobs"), showAllJobs=false;
   unlocked=(sessionStorage.getItem("fp-unlock")===state.pin);
   var local=load("fp-local",{});
   local.add=local.add||[];local.del=local.del||[];local.edit=local.edit||{};
@@ -406,13 +401,12 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
   function dayNumber(d){return Math.floor(new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime()/86400000)}
   function dailyLetter(d){return LETTERS[((dayNumber(d)%LETTERS.length)+LETTERS.length)%LETTERS.length]}
   function phonicsLine(letter){
-    var l=letter[0], examples={A:"apple and ant",E:"egg and elephant",I:"igloo and insect",O:"octopus and olive",U:"umbrella and up"};
-    if(l==="X")return "Big X, little x. Listen to the last sound in fox: fox. You can hear it in box and six, too.";
-    if(l==="V")return "Big V, little v. Listen to the first sound in van: van. Put your top teeth on your lower lip. Feel it buzz! Violin and volcano begin that way, too.";
-    var words=examples[l]||PHONICS[l][1];
-    return "Big "+l+", little "+l.toLowerCase()+". Listen to the first sound in "+letter[1]+": "+letter[1]+". You can hear it in "+words+", too.";
+    var l=letter[0], pair=SOUND_PAIRS[l];
+    if(l==="X")return "Big X, little x. Listen to fox. Fox. Now box. Box. They end with the same sound. Can you hear it?";
+    if(l==="V")return "Big V, little v. Listen to van. Van. Put your top teeth on your lower lip and feel the buzz. Violin starts the same way!";
+    return "Big "+l+", little "+l.toLowerCase()+". Listen to "+pair[0]+". "+pair[0]+". Now "+pair[1]+". "+pair[1]+". They start with the same sound. Can you hear it?";
   }
-  function letterQuestion(letter){return (letter[0]==="X"?"Which picture has the X sound at the end?":"Which picture starts with "+letter[0]+"?")+" Tap a picture. Then press the check."}
+  function letterQuestion(letter){var l=letter[0];return (l==="X"?"Which picture ends like fox?":"Which picture starts like "+SOUND_PAIRS[l][0]+"?")+" Tap each picture to hear its name. Then press the check."}
   function dailyMoves(d){var n=dayNumber(d),out=[];for(var i=0;i<3;i++)out.push(EXERCISES[(n*2+i*3)%EXERCISES.length]);return out}
   function dailyDiscovery(d){
     var day=(d.getDay()+6)%7,week=Math.floor((dayNumber(d)-day)/7),theme=DISCOVERIES[((week%DISCOVERIES.length)+DISCOVERIES.length)%DISCOVERIES.length];
@@ -442,6 +436,20 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
   function isKaiyaKey(key){
     var parts=String(key).split(":");if(parts.length<4)return false;
     return items().some(function(it){return it.id===parts[2]&&(it.who||[]).indexOf("daughter")>-1});
+  }
+  function queueCompletion(key, completed){
+    if(!/^d:\d{4}-\d{2}-\d{2}:rec[A-Za-z0-9]+:(Morning|Afternoon|Evening|Anytime)$/.test(key))return;
+    completionPending[key]=completed;save("fp-completion-pending",completionPending);
+    if(location.protocol==="file:"){completionError="Progress on this local file stays on this device. Use the Netlify draft to sync with Airtable.";render();return}
+    var previous=completionQueues[key]||Promise.resolve();
+    var queued=previous.catch(function(){}).then(function(){
+      return fetch("/.netlify/functions/family-data",{method:"POST",headers:{"content-type":"application/json","x-portal-pin":state.pin},body:JSON.stringify({key:key,completed:completed})})
+        .then(function(r){return r.json().then(function(body){if(!r.ok)throw new Error(body.error||"Could not save");return body})})
+        .then(function(){if(completionPending[key]===completed){delete completionPending[key];save("fp-completion-pending",completionPending)}completionError="";render()})
+        .catch(function(err){completionError="Could not save progress to Airtable: "+(err.message||"connection failed")+". Your check is kept on this device and will retry.";render()});
+    });
+    completionQueues[key]=queued;
+    queued.then(function(){if(completionQueues[key]===queued)delete completionQueues[key]});
   }
 
   /* ---------- avatars ---------- */
@@ -482,17 +490,17 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
     var emo=null;EMOTIONS.forEach(function(e){if(e[0]===c.feel)emo=e});
     var y=dayAt(-1), t=dayAt(1);
 
-    h+='<div class="dayline"><div><h1>Good '+(new Date().getHours()<12?'morning':new Date().getHours()<17?'afternoon':'evening')+', Kaiya!</h1><div class="sub">'+DOWLONG[d.getDay()]+', '+MONTHS[d.getMonth()]+' '+d.getDate()+'</div></div></div>';
-    h+='<div class="kid-tabs"><button class="kid-tab" data-kid-screen="hello" aria-pressed="'+(kidScreen==='hello')+'">👋 Hello</button><button class="kid-tab" data-kid-screen="jobs" aria-pressed="'+(kidScreen==='jobs')+'">✅ My jobs</button></div>';
+    h+='<div class="dayline"><div><h1>Hi, Kaiya! 👋</h1><div class="sub">'+DOWLONG[d.getDay()]+', '+MONTHS[d.getMonth()]+' '+d.getDate()+'</div></div></div>';
+    h+='<div class="kid-tabs"><button class="kid-tab" data-kid-screen="jobs" aria-pressed="'+(kidScreen==='jobs')+'">✅ Start here</button><button class="kid-tab" data-kid-screen="hello" aria-pressed="'+(kidScreen==='hello')+'">🔤 Learn & play</button></div>';
     var weekStart=new Date(d);weekStart.setDate(d.getDate()-d.getDay());
-    h+='<div class="kid-week" aria-label="Choose a day this week">';
+    if(kidScreen==='hello')h+='<details class="week-details"><summary>📅 See this week</summary><div class="kid-week" aria-label="Choose a day this week">';
     for(var wi=0;wi<7;wi++){
       var wd=new Date(weekStart);wd.setDate(weekStart.getDate()+wi);var woff=Math.round((wd-dayAt(0))/864e5),wplans=plans("daughter",wd);
-      h+='<button class="kid-day" data-goto="'+woff+'" aria-current="'+(iso(wd)===iso(d))+'">'+DOW[wi]+'<b>'+wd.getDate()+'</b><span>'+wplans.map(function(x){return x.it.emoji}).join('')+'</span></button>';
+      if(kidScreen==='hello')h+='<button class="kid-day" data-goto="'+woff+'" aria-current="'+(iso(wd)===iso(d))+'">'+DOW[wi]+'<b>'+wd.getDate()+'</b><span>'+wplans.map(function(x){return x.it.emoji}).join('')+'</span></button>';
     }
-    h+='</div>';
+    if(kidScreen==='hello')h+='</div></details>';
     var rewardWon=reward.stars>=reward.goal,rewardPct=Math.min(100,Math.round(100*reward.stars/reward.goal));
-    h+='<div class="reward-card'+(rewardWon?' won':'')+'"><div class="reward-star">'+(rewardWon?'🏆':'⭐')+'</div><div><h2>'+(rewardWon?'You earned your prize!':reward.stars+' of '+reward.goal+' stars')+'</h2><p>'+(rewardWon?esc(reward.prize):'Keep going! Your prize is: '+esc(reward.prize))+'</p></div><div class="reward-track"><i style="width:'+rewardPct+'%"></i></div></div>';
+    if(kidScreen==='hello')h+='<div class="reward-card'+(rewardWon?' won':'')+'"><div class="reward-star">'+(rewardWon?'🏆':'⭐')+'</div><div><h2>'+(rewardWon?'You earned your prize!':reward.stars+' of '+reward.goal+' stars')+'</h2><p>'+(rewardWon?esc(reward.prize):'Keep going! Your prize is: '+esc(reward.prize))+'</p></div><div class="reward-track"><i style="width:'+rewardPct+'%"></i></div></div>';
 
     // check-in (collapses once it is finished)
     var complete=!!(emo&&c.day!=null), showFull=!complete||ciEdit, ci="";
@@ -562,16 +570,16 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
     var tasks=jobs("daughter",d), n=tasks.filter(function(x){return done[x.key]}).length, total=tasks.length;
     var next=tasks.filter(function(x){return !done[x.key]})[0];
     if(next){
-      h+='<div class="job-hero"><span class="hero-pic">'+esc(next.it.emoji)+'</span><div><span class="hero-label">Do this now</span><h2>'+esc(next.it.title)+'</h2><span>'+esc(next.slot)+'</span></div><div class="hero-actions"><button data-say="'+esc(next.it.title)+'">🔊 Hear it</button><button data-key="'+esc(next.key)+'">✓ Done</button></div></div>';
+      h+='<div class="job-hero"><span class="hero-pic">'+esc(next.it.emoji)+'</span><div><span class="hero-label">Start with this · '+esc(next.slot)+'</span><h2>'+esc(next.it.title)+'</h2><span>⭐ '+reward.stars+' of '+reward.goal+' stars</span></div><div class="hero-actions"><button data-say="'+esc(next.it.title)+'">🔊 Hear it</button><button data-key="'+esc(next.key)+'">✓ I did it!</button></div></div>';
       var upcoming=tasks.filter(function(x){return !done[x.key]&&x.key!==next.key}).slice(0,3);
       if(upcoming.length){h+='<div class="next-jobs"><h2>Then...</h2>';upcoming.forEach(function(x){h+='<div>'+esc(x.it.emoji)+' '+esc(x.it.title)+'</div>'});h+='</div>'}
     }
-    if(total){h+='<div class="job-path" aria-label="Your job path">';tasks.forEach(function(x){h+='<button class="'+(done[x.key]?'done':'')+'" data-say="'+esc(x.it.title)+'" aria-label="'+esc(x.it.title)+(done[x.key]?' done':'')+'">'+esc(x.it.emoji)+'</button>'});h+='</div>'}
-    h+='<div class="next-jobs"><h2>🌟 Learning time</h2><div>Today’s letter is '+letter[0]+' '+letter[0].toLowerCase()+', and there is a new discovery waiting.</div><button class="learning-link" data-kid-screen="hello">Let’s learn →</button></div>';
+    h+='<div class="next-jobs"><h2>🌟 Ready for a brain break?</h2><div>Today’s letter is '+letter[0]+' '+letter[0].toLowerCase()+'.</div><button class="learning-link" data-kid-screen="hello">Learn & play →</button></div>';
     var dens=total<=5?"xl":total<=8?"l":total<=13?"m":"s";
     var slotsUsed=["Morning","Afternoon","Evening","Anytime"].filter(function(s){return tasks.some(function(x){return x.slot===s})});
     if(total&&n===total)h+='<div class="cheer"><span class="big">🎉⭐🎉</span>All done! Great job, Kaiya!</div>';
-    if(total){
+    if(total)h+='<button class="all-jobs-toggle" data-all-jobs="1" aria-expanded="'+showAllJobs+'">'+(showAllJobs?'Hide all jobs':'See all jobs')+' · '+n+'/'+total+' done</button>';
+    if(total&&showAllJobs){
       h+='<div class="stars" aria-hidden="true">';tasks.forEach(function(x){h+=done[x.key]?"⭐":"☆"});h+='</div>';
       h+='<div class="groups dens-'+dens+'">';
       slotsUsed.forEach(function(s){
@@ -590,7 +598,7 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
         h+='</section>';
       });
       h+='</div>';
-    } else {
+    } else if(!total) {
       h+='<div class="empty"><span class="big">🌈</span>Nothing to do. Play time!</div>';
     }
     return h;
@@ -697,6 +705,7 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
     PEOPLE.forEach(function(p){h+='<button class="person" data-who="'+p.id+'" aria-pressed="'+(p.id===who)+'"><span class="face">'+avatar(p.id,kid?60:36)+'</span>'+p.name+'</button>'});
     h+='</div><button class="gear" id="gear" aria-label="Grown-up settings (press and hold)">⚙️</button></div>';
     if(syncMessage)h+='<div class="sync-alert" role="status">'+esc(syncMessage)+'</div>';
+    if(completionError)h+='<div class="sync-alert" role="status">'+esc(completionError)+'</div>';
     h+=kid?kidView(d):adultView(d);
     if(sheetOpen)h+=sheet();
     app.innerHTML=h;
@@ -808,7 +817,9 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
     var au=t.closest("[data-audio]");
     if(au&&!au.hasAttribute("data-letter-choice")){ev.stopPropagation();playClip(au.getAttribute("data-audio"),au.getAttribute("data-fallback"));return}
     var ks=t.closest("[data-kid-screen]");
-    if(ks&&!sheetOpen){kidScreen=ks.getAttribute("data-kid-screen");save("fp-kid-screen",kidScreen);render();window.scrollTo(0,0);return}
+    if(ks&&!sheetOpen){kidScreen=ks.getAttribute("data-kid-screen");save("fp-kid-screen-v2",kidScreen);render();window.scrollTo(0,0);return}
+    var aj=t.closest("[data-all-jobs]");
+    if(aj&&!sheetOpen){showAllJobs=!showAllJobs;render();return}
     var p=t.closest("[data-who]");
     if(p){who=p.getAttribute("data-who");save("fp-who",who);offset=0;ciEdit=false;render();window.scrollTo(0,0);return}
     var nv=t.closest("[data-nav]");
@@ -845,7 +856,7 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
     if(tile&&!sheetOpen){
       var k=tile.getAttribute("data-key");
       if(done[k]){delete done[k];if(isKaiyaKey(k))reward.stars=Math.max(0,reward.stars-1)}else{done[k]=1;justDone=k;if(isKaiyaKey(k))reward.stars++}
-      save("fp-done",done);save("fp-reward",reward);render();return;
+      save("fp-done",done);save("fp-reward",reward);render();queueCompletion(k,!!done[k]);return;
     }
     var cg=t.closest("[data-collapse]");
     if(cg&&!sheetOpen){
@@ -889,7 +900,7 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
           editing=null;sheetMsg="Deleted on this device.";if(!editFromList){sheetOpen=false;sheetMsg=""}render();
         }
       }
-      else if(act==="reset-today"){var pre="d:"+iso(viewDate())+":";Object.keys(done).forEach(function(k3){if(k3.indexOf(pre)===0){if(isKaiyaKey(k3))reward.stars=Math.max(0,reward.stars-1);delete done[k3]}});delete checkins[iso(viewDate())];save("fp-done",done);save("fp-checkin",checkins);save("fp-reward",reward);sheetOpen=false;render()}
+      else if(act==="reset-today"){var pre="d:"+iso(viewDate())+":";Object.keys(done).forEach(function(k3){if(k3.indexOf(pre)===0){if(isKaiyaKey(k3))reward.stars=Math.max(0,reward.stars-1);delete done[k3];queueCompletion(k3,false)}});delete checkins[iso(viewDate())];save("fp-done",done);save("fp-checkin",checkins);save("fp-reward",reward);sheetOpen=false;render()}
       return;
     }
     if(t.id==="sheet"){sheetOpen=false;editing=null;render()}
@@ -905,7 +916,21 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
     if(!force&&Date.now()-lastSync<30000)return Promise.resolve();
     lastSync=Date.now();
     return fetch("/.netlify/functions/family-data",{cache:"no-store"}).then(function(r){if(!r.ok)throw new Error(r.status===503?"Airtable sync needs its secure token in Netlify.":"Airtable sync is unavailable right now.");return r.json()}).then(function(data){
-      if(Array.isArray(data.items)){state.items=data.items;local.edit={};local.del=[];save("fp-local",local);syncMessage="";if(!sheetOpen)render()}
+      if(Array.isArray(data.items)){
+        state.items=data.items;local.edit={};local.del=[];save("fp-local",local);
+        if(Array.isArray(data.completions)){
+          var remote={};data.completions.forEach(function(c){remote[c.key]=c.completed});
+          if(!load("fp-completions-imported",false)){
+            Object.keys(done).forEach(function(k){if(done[k]&&/^d:\d{4}-\d{2}-\d{2}:rec[A-Za-z0-9]+:/.test(k)&&!Object.prototype.hasOwnProperty.call(remote,k)&&state.items.some(function(it){return k.indexOf(":"+it.id+":")>-1})){completionPending[k]=true}});
+            save("fp-completion-pending",completionPending);save("fp-completions-imported",true);
+          }
+          Object.keys(done).forEach(function(k){if(/^d:\d{4}-\d{2}-\d{2}:rec[A-Za-z0-9]+:/.test(k)&&!Object.prototype.hasOwnProperty.call(completionPending,k))delete done[k]});
+          Object.keys(remote).forEach(function(k){if(!Object.prototype.hasOwnProperty.call(completionPending,k)&&remote[k])done[k]=1});
+          save("fp-done",done);
+          Object.keys(completionPending).forEach(function(k){if(!completionQueues[k])queueCompletion(k,completionPending[k])});
+        }
+        syncMessage="";if(!sheetOpen)render()
+      }
     }).catch(function(err){syncMessage=err.message||"Airtable sync is unavailable right now.";if(!sheetOpen)render()});
   }
   function tick(){var dn=iso(new Date());if(dn!==lastDay){lastDay=dn;if(offset===0&&!sheetOpen)render()}syncAirtable(false)}

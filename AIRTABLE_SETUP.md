@@ -53,16 +53,18 @@ Examples:
 ## 3. Completions
 
 The app creates these records; they are not part of everyday Airtable data entry.
+Checking a task in the Netlify-hosted portal upserts one record per task, day, and time of day. Unchecking it keeps the record but clears **Completed**. The app reads these records back on refresh so checks follow you between devices. A locally opened `file://` copy cannot reach the Netlify Function and keeps progress on that device only.
 
 | Field | Airtable type | Purpose |
 | --- | --- | --- |
-| Completion | Single line text (primary) | A readable unique label |
-| Task | Link to Tasks | The completed routine |
+| Completion | Single line text (primary) | Unique task/day/time key used to prevent duplicates |
+| Task | Single line text | The completed routine’s name |
 | Who | Single select | Kaiya, Mom, Dad |
 | Date | Date | Day completed |
 | Time of Day | Single select | Morning, Afternoon, Evening |
 | Completed | Checkbox | Completion state |
-| Completed At | Created time | Automatic timestamp |
+
+The existing Completions table does not have a `Completed At` field; Airtable still tracks when each record was created.
 
 ## Views that keep Airtable tidy
 
@@ -86,4 +88,5 @@ The grown-up editor uses the same choices as Airtable:
 5. Date or selected weekdays
 6. Time of day
 
-App edits currently stay in the browser until the Airtable connection is configured. Never place an Airtable token in `index.html`; the Netlify Function should hold it securely in an `AIRTABLE_TOKEN` environment variable.
+Tasks and calendar items added in the app editor still stay in that browser; edit Airtable itself for shared items. Task check-offs from the Netlify-hosted app write to Completions once the token has write permission. Never place an Airtable token in `index.html`; the Netlify Function holds it securely in an `AIRTABLE_TOKEN` environment variable.
+The token needs `data.records:read` for Tasks, Calendar, and Completions, plus `data.records:write` for Completions. The PIN in the static app is a family convenience gate, not strong security for a public site.
