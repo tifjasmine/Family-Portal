@@ -165,6 +165,14 @@ body[data-mode="adult"] .person[aria-pressed="true"]{border-color:var(--grape)}
 .move .move-check{margin-left:auto;width:34px;height:34px;border:4px solid var(--line);border-radius:50%;display:grid;place-items:center;font-size:22px;color:#fff}
 .move.done{background:var(--leaf-soft);border-color:var(--leaf)}.move.done .move-check{background:var(--leaf);border-color:var(--leaf)}.move.done .move-check::after{content:"\2713"}
 .workout-cheer{text-align:center;color:var(--leaf);font-size:20px;font-weight:700;margin:10px 0 0}
+.discovery-card{background:linear-gradient(160deg,var(--paper),var(--bg));border:3px solid var(--sun)}
+.discovery-theme{display:inline-block;background:var(--sun);color:#483412;border-radius:999px;padding:5px 11px;font-size:15px;font-weight:700;margin-bottom:12px}
+.discovery-surprise{width:100%;border:3px dashed var(--grape);border-radius:22px;background:var(--paper);padding:18px;font-size:21px;font-weight:600;text-align:center}
+.discovery-surprise .big{display:block;font-size:58px;margin-bottom:4px}
+.discovery-content{font-size:20px;line-height:1.35}.discovery-content .big{font-size:58px;display:block;text-align:center}
+.discovery-content strong{display:block;font-size:23px;margin:6px 0 8px}
+.discovery-try{background:var(--paper);border-radius:18px;padding:10px 13px;margin:12px 0;font-size:18px}
+.discovery-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 
 /* ---- grown-up ---- */
 .a-wrap{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(280px,1fr);gap:18px;align-items:start}
@@ -252,6 +260,47 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
 {"id":"gigi","title":"Gigi / PopPop pick up","emoji":"👵🏽👴🏽🚗","who":["daughter"],"type":"plan","repeat":{"kind":"days","days":[1,2,4]},"slots":["Afternoon"]},
 {"id":"dentist-2026-09-23","title":"Dentist appointment","emoji":"🦷","who":["daughter"],"type":"plan","repeat":{"kind":"date","date":"2026-09-23"},"slots":["Afternoon"]}
 ]}</script>
+<script type="application/json" id="fp-discoveries">[
+{"key":"animals","theme":"Amazing animals","days":[
+{"emoji":"🐦","fact":"Birds have feathers. Feathers help many birds fly and keep them warm.","try":"Flap your arms like wings, then wrap them around yourself like a warm feather coat!"},
+{"emoji":"🐟","fact":"Fish use gills to take oxygen from water.","try":"Pretend to swim around the room like a fish!"},
+{"emoji":"🐜","fact":"Insects have six legs. Ants are insects!","try":"Count to six on your fingers, then march like a tiny ant."},
+{"emoji":"🐸","fact":"A baby frog starts life as a tadpole in water.","try":"Wiggle like a tadpole, then hop like a frog!"},
+{"emoji":"🐈","fact":"A baby cat is called a kitten.","try":"Stretch like a sleepy kitten and make a gentle meow!"},
+{"emoji":"🦋","fact":"Butterflies begin life as caterpillars.","try":"Crawl like a caterpillar, then open your butterfly wings!"},
+{"emoji":"🐢","fact":"A turtle's shell is part of its body.","try":"Curl up small like a turtle resting in its shell."}]},
+{"key":"space","theme":"Sky and space","days":[
+{"emoji":"☀️","fact":"The Sun is a star. It gives Earth light and warmth.","try":"Stretch your arms wide like sunshine reaching Earth!"},
+{"emoji":"🌍","fact":"Earth is the planet we live on.","try":"Make a round Earth with your arms. What is your favorite place on Earth?"},
+{"emoji":"🌙","fact":"The Moon goes around Earth.","try":"Walk slowly in a circle around a toy to be the Moon."},
+{"emoji":"🌞","fact":"Earth spins. That is why we have day and night.","try":"Turn around slowly once. Pretend one side is daytime and the other is nighttime."},
+{"emoji":"⭐","fact":"Stars make their own light. The Sun is our closest star.","try":"Make a star shape with your hands!"},
+{"emoji":"🚀","fact":"Astronauts wear spacesuits that help them breathe in space.","try":"Take a slow astronaut walk across the room!"},
+{"emoji":"🌛","fact":"The Moon has rocks and dust on its surface.","try":"Draw a Moon with circles for its craters."}]},
+{"key":"plants","theme":"Growing things","days":[
+{"emoji":"🌱","fact":"A seed can grow into a new plant.","try":"Curl up like a seed, then slowly grow tall!"},
+{"emoji":"🌿","fact":"Roots help a plant take in water from the soil.","try":"Stand still and spread your toes like roots."},
+{"emoji":"🍃","fact":"Leaves use sunlight to help a plant make food.","try":"Hold out your hands like leaves catching sunshine."},
+{"emoji":"🌼","fact":"Flowers are parts of many plants.","try":"Look for a flower outside or draw one."},
+{"emoji":"🌳","fact":"Trees are plants with woody trunks.","try":"Stand tall and stretch your arms out like branches."},
+{"emoji":"💧","fact":"Plants need water to grow.","try":"Help water a plant with a grown-up."},
+{"emoji":"🍎","fact":"Many fruits have seeds inside them.","try":"Ask a grown-up to help you find the seeds in a piece of fruit."}]},
+{"key":"weather","theme":"Weather wonders","days":[
+{"emoji":"☁️","fact":"Clouds are made of tiny drops of water or tiny pieces of ice.","try":"Make a fluffy cloud shape with your hands."},
+{"emoji":"🌧️","fact":"Rain is water that falls from clouds.","try":"Tap your fingers gently like raindrops."},
+{"emoji":"❄️","fact":"Snow is made of tiny ice crystals.","try":"Make a snowflake with your fingers."},
+{"emoji":"💨","fact":"Wind is moving air.","try":"Blow gently on your hand. Can you feel moving air?"},
+{"emoji":"⚡","fact":"Thunder is the sound we hear after lightning.","try":"Make a quiet thunder sound by tapping your hands on your knees."},
+{"emoji":"👤","fact":"A shadow appears when something blocks light.","try":"Find your shadow with a grown-up and wave to it!"},
+{"emoji":"🌈","fact":"Rainbows can appear when sunlight shines through raindrops.","try":"Name as many rainbow colors as you can."}]},
+{"key":"body","theme":"My amazing body","days":[
+{"emoji":"❤️","fact":"Your heart pumps blood around your body.","try":"Put a hand on your chest. Can you feel your heartbeat?"},
+{"emoji":"🫁","fact":"Your lungs help you breathe.","try":"Take one slow breath in, then blow it out gently."},
+{"emoji":"🦴","fact":"Bones help hold your body up.","try":"Stand tall like a strong skeleton!"},
+{"emoji":"💪","fact":"Muscles help your body move.","try":"Bend your arm and feel your muscle get firm."},
+{"emoji":"👂","fact":"Your ears help you hear sounds.","try":"Close your eyes for a moment. What can you hear?"},
+{"emoji":"👅","fact":"Your tongue helps you taste food.","try":"Think of something sweet and something sour."},
+{"emoji":"🖐️","fact":"Your skin helps you feel touch.","try":"Touch something soft, then something smooth."}]}]</script>
 <script>
 (function(){
   var PEOPLE=[{id:"daughter",name:"Kaiya"},{id:"mom",name:"Mom"},{id:"dad",name:"Dad"}];
@@ -274,6 +323,7 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
   var EXERCISES=[
     ["jump","⭐","Star jumps","5 jumps"],["march","🥁","March in place","10 steps"],["stretch","🌳","Reach up tall","Count to 5"],["balance","🦩","Flamingo balance","5 seconds each foot"],["squat","🪑","Chair squats","5 squats"],["twist","🌪️","Side-to-side twists","10 twists"],["toe","👟","Touch your toes","5 times"],["arms","✈️","Airplane arms","Count to 10"],["hop","🐰","Bunny hops","5 hops"]
   ];
+  var DISCOVERIES=JSON.parse(document.getElementById("fp-discoveries").textContent);
 
   var state=JSON.parse(document.getElementById("fp-data").textContent);
   state.pin=String(load("fp-pin",state.pin||"123"));
@@ -288,6 +338,7 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
   who=load("fp-who","daughter"); done=load("fp-done",{}); checkins=load("fp-checkin",{});
   var collapsed=load("fp-collapsed",{});
   var workoutDone=load("fp-workout",{}), lessonOpen=false, letterPick="", letterSubmitted=false;
+  var discovered=load("fp-discovered",{});
   var reward=load("fp-reward",{stars:0,goal:20,prize:"Choose a special treat!"});
   reward.stars=Math.max(0,+reward.stars||0);reward.goal=Math.max(1,+reward.goal||20);reward.prize=reward.prize||"Choose a special treat!";
   unlocked=(load("fp-unlock","")===state.pin);
@@ -344,6 +395,10 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
   }
   function letterQuestion(letter){return (letter[0]==="X"?"Which picture has the X sound at the end?":"Which picture starts with "+letter[0]+"?")+" Tap a picture. Then press the check."}
   function dailyMoves(d){var n=dayNumber(d),out=[];for(var i=0;i<3;i++)out.push(EXERCISES[(n*2+i*3)%EXERCISES.length]);return out}
+  function dailyDiscovery(d){
+    var day=(d.getDay()+6)%7,week=Math.floor((dayNumber(d)-day)/7),theme=DISCOVERIES[((week%DISCOVERIES.length)+DISCOVERIES.length)%DISCOVERIES.length];
+    return {theme:theme,day:day,entry:theme.days[day]};
+  }
 
   function occurs(it,d){
     var r=it.repeat||{kind:"daily"};
@@ -471,7 +526,15 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
     }
     h+='</section><section class="fun-card"><div class="fun-head"><h2>💪 Morning workout</h2><span>'+moveCount+'/3</span></div><div class="workout-list">';
     moves.forEach(function(m){var mk=wk+":"+m[0], mDone=!!workoutDone[mk];h+='<button class="move'+(mDone?" done":"")+'" data-workout="'+esc(mk)+'" aria-pressed="'+mDone+'"><span class="move-emoji">'+m[1]+'</span><span><strong>'+m[2]+'</strong><small>'+m[3]+'</small></span><span class="move-check" aria-hidden="true"></span></button>'});
-    h+='</div>'+(moveCount===3?'<p class="workout-cheer">Amazing! Your body is ready! 🌟</p>':'')+'</section></div>';
+    h+='</div>'+(moveCount===3?'<p class="workout-cheer">Amazing! Your body is ready! 🌟</p>':'')+'</section>';
+    var discovery=dailyDiscovery(d),discoveryKey=iso(d),found=!!discovered[discoveryKey];
+    h+='<section class="fun-card discovery-card"><div class="fun-head"><h2>🔎 Today’s discovery</h2></div><span class="discovery-theme">This week: '+esc(discovery.theme.theme)+'</span>';
+    if(!found){
+      h+='<button class="discovery-surprise" data-discover="1"><span class="big">🎁</span>Tap to reveal today’s surprise!</button>';
+    } else {
+      h+='<div class="discovery-content"><span class="big">'+esc(discovery.entry.emoji)+'</span><strong>Did you know?</strong><div>'+esc(discovery.entry.fact)+'</div><div class="discovery-try"><strong>🌟 Try it!</strong>'+esc(discovery.entry.try)+'</div><div class="discovery-actions"><button class="sound-btn" data-audio="audio/discoveries/'+discovery.theme.key+'-'+discovery.day+'.mp3" data-fallback="'+esc(discovery.entry.fact+' '+discovery.entry.try)+'">🔊 Tell me!</button></div></div>';
+    }
+    h+='</section></div>';
 
     // jobs: layout adapts to how many there are
     var tasks=jobs("daughter",d), n=tasks.filter(function(x){return done[x.key]}).length, total=tasks.length;
@@ -730,6 +793,8 @@ button:focus-visible{outline:4px solid var(--coral);outline-offset:2px}
     if(ls&&!sheetOpen){var dl=dailyLetter(viewDate());if(!letterPick){playClip("audio/feedback/choose.mp3","Choose a picture first.");return}letterSubmitted=true;playClip(letterPick===dl[0]?"audio/feedback/correct.mp3":"audio/feedback/again.mp3",letterPick===dl[0]?"Yes! Great listening!":"Almost. Listen again, and try another picture.");render();return}
     var wo=t.closest("[data-workout]");
     if(wo&&!sheetOpen){var wk2=wo.getAttribute("data-workout");if(workoutDone[wk2])delete workoutDone[wk2];else workoutDone[wk2]=1;save("fp-workout",workoutDone);render();return}
+    var discover=t.closest("[data-discover]");
+    if(discover&&!sheetOpen){var dd=dailyDiscovery(viewDate());discovered[iso(viewDate())]=1;save("fp-discovered",discovered);render();playClip("audio/discoveries/"+dd.theme.key+"-"+dd.day+".mp3",dd.entry.fact+" "+dd.entry.try);return}
     var em=t.closest("[data-emo]");
     if(em&&!sheetOpen){
       var id=em.getAttribute("data-emo"),k1=iso(viewDate());
