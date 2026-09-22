@@ -253,11 +253,11 @@ body[data-mode="kid"] .reward-track{background:#d5c1ea}
 body[data-mode="kid"] .kid-day[aria-current="true"]{background:var(--grape);color:white}
 body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
 .kid-tabs{display:flex;gap:10px;margin:0 0 20px}.kid-tab{flex:1;border:2px solid #d9c3f1;background:var(--paper);border-radius:99px;padding:12px 16px;font-weight:800;font-size:18px}.kid-tab[aria-pressed="true"]{background:var(--grape);color:#fff;border-color:var(--grape)}
-.hello-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-bottom:18px}.hello-grid .card-k,.hello-grid .fun-card{margin:0;min-width:0}.hello-grid .strip{max-width:100%}
-.face-prompt{font-size:clamp(24px,4vw,34px);line-height:1.2;margin:18px 0}.face-again{border:0;border-radius:99px;background:#e9ddf7;padding:10px 20px;font-weight:800}
+.hello-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-bottom:18px}.hello-grid .card-k,.hello-grid .fun-card{margin:0;min-width:0}.hello-grid .strip{max-width:100%}.hello-grid .card-k:last-child{grid-column:1/-1}
+.learning-link{border:0;border-radius:99px;background:#e9ddf7;padding:10px 20px;font-weight:800}
 .kid-cta{display:block;width:100%;border:0;border-radius:24px;background:var(--grape);color:white;font-size:24px;font-weight:800;padding:19px 20px;margin:0 0 22px;box-shadow:0 6px 0 #7957b3}
 .job-hero{display:grid;grid-template-columns:auto 1fr;gap:12px 18px;align-items:center;background:#e9ddf7;border:1px solid #d9c3f1;border-radius:30px;padding:22px;margin:0 0 18px}.job-hero .hero-pic{font-size:72px;line-height:1}.job-hero h2{margin:2px 0;font-size:clamp(28px,5vw,42px)}.job-hero .hero-label{font-weight:800;color:#6b4a9c;text-transform:uppercase;letter-spacing:.09em}.hero-actions{grid-column:1/-1;display:flex;gap:10px}.hero-actions button{flex:1;border:0;border-radius:18px;padding:14px;font-size:20px;font-weight:800;background:var(--paper)}.hero-actions button:last-child{background:var(--leaf);color:#fff}.next-jobs{background:var(--paper);border:1px solid var(--line);border-radius:26px;padding:18px;margin-bottom:18px}.next-jobs h2{margin:0 0 12px}.next-jobs div{font-size:20px;padding:6px 0}.job-path{display:flex;gap:8px;overflow-x:auto;margin-bottom:18px}.job-path button{min-width:64px;border:2px solid var(--line);background:var(--paper);border-radius:18px;padding:9px;font-size:30px}.job-path button.done{background:var(--leaf-soft);border-color:var(--leaf)}
-@media(max-width:680px){.hello-grid{grid-template-columns:1fr}.kid-tabs{position:sticky;top:0;z-index:5;background:var(--bg);padding:8px 0}.job-hero .hero-pic{font-size:58px}}
+@media(max-width:680px){.hello-grid{grid-template-columns:1fr}.hello-grid .card-k:last-child{grid-column:auto}.kid-tabs{position:sticky;top:0;z-index:5;background:var(--bg);padding:8px 0}.job-hero .hero-pic{font-size:58px}}
 </style>
 </head>
 <body data-mode="kid">
@@ -359,8 +359,7 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
   var discovered=load("fp-discovered",{});
   var reward=load("fp-reward",{stars:0,goal:20,prize:"Choose a special treat!"});
   reward.stars=Math.max(0,+reward.stars||0);reward.goal=Math.max(1,+reward.goal||20);reward.prize=reward.prize||"Choose a special treat!";
-  var kidScreen=load("fp-kid-screen","hello"), faceIndex=load("fp-face-index",0);
-  var FACE_PROMPTS=["Make a big silly smile! 😁","Stick out your tongue! 😛","Make a surprised face! 😮","Roar like a lion! 🦁","Scrunch up your nose! 🐰","Make fish lips! 🐠"];
+  var kidScreen=load("fp-kid-screen","hello");
   unlocked=(sessionStorage.getItem("fp-unlock")===state.pin);
   var local=load("fp-local",{});
   local.add=local.add||[];local.del=local.del||[];local.edit=local.edit||{};
@@ -530,12 +529,15 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
     if(pt.length)pt.forEach(function(x){md+='<span class="c">'+esc(x.it.emoji)+' '+esc(x.it.title)+'</span>'});
     else md+='<span class="c">🏡 Home day</span>';
     md+='</div></div>';
-    if(kidScreen==='hello')h+='<div class="hello-grid">'+ci+'<div class="card-k"><h2>Make a fun face</h2><p class="face-prompt">'+FACE_PROMPTS[faceIndex%FACE_PROMPTS.length]+'</p><button class="face-again" data-face-again="1">Another face ↻</button></div>'+md+'</div>';
+    var moves=dailyMoves(d), wk=iso(d), moveCount=moves.filter(function(m){return workoutDone[wk+":"+m[0]]}).length;
+    var workout='<section class="fun-card"><div class="fun-head"><h2>💪 Morning workout</h2><span>'+moveCount+'/3</span></div><div class="workout-list">';
+    moves.forEach(function(m){var mk=wk+":"+m[0], mDone=!!workoutDone[mk];workout+='<button class="move'+(mDone?" done":"")+'" data-workout="'+esc(mk)+'" aria-pressed="'+mDone+'"><span class="move-emoji">'+m[1]+'</span><span><strong>'+m[2]+'</strong><small>'+m[3]+'</small></span><span class="move-check" aria-hidden="true"></span></button>'});
+    workout+='</div>'+(moveCount===3?'<p class="workout-cheer">Amazing! Your body is ready! 🌟</p>':'')+'</section>';
+    if(kidScreen==='hello')h+='<div class="hello-grid">'+ci+workout+md+'</div>';
 
     // playful daily learning and movement
     var letter=dailyLetter(d), li=LETTERS.indexOf(letter), choices=[letter,LETTERS[(li+8)%26],LETTERS[(li+17)%26]];
     if(dayNumber(d)%2)choices=[choices[1],choices[0],choices[2]];
-    var moves=dailyMoves(d), wk=iso(d), moveCount=moves.filter(function(m){return workoutDone[wk+":"+m[0]]}).length;
     var fun='<div class="daily-fun"><section class="fun-card"><div class="fun-head"><h2>🔤 Letter of the day</h2></div>'
       +'<button class="letter-launch" data-letter-toggle="1" aria-expanded="'+lessonOpen+'"><span class="letter-badge">'+letter[0]+'<small>'+letter[0].toLowerCase()+'</small></span><span><strong>'+letter[0]+' '+letter[0].toLowerCase()+(letter[0]==="X"?' is in ':' is for ')+letter[1]+'</strong><small>Tap for a mini lesson!</small></span></button>';
     if(lessonOpen){
@@ -545,9 +547,7 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
       choices.forEach(function(ch){var picked=letterPick===ch[0],right=letterSubmitted&&picked&&ch[0]===letter[0],wrong=letterSubmitted&&picked&&ch[0]!==letter[0];fun+='<button class="letter-choice'+(picked?" selected":"")+(right?" right":"")+(wrong?" wrong":"")+'" data-letter-choice="'+ch[0]+'" data-audio="audio/words/'+ch[0].toLowerCase()+'.mp3" data-fallback="'+esc(ch[1])+'." aria-pressed="'+picked+'" aria-label="'+esc(ch[1])+'">'+ch[2]+'</button>'});
       fun+='</div><button class="letter-submit" data-letter-submit="1" aria-label="Check answer"'+(letterPick?'':' disabled')+'>✓ Check answer</button><div class="letter-feedback" aria-live="polite">'+(letterSubmitted?(letterPick===letter[0]?"🎉 Yes! "+letter[1]+(letter[0]==="X"?" ends with the X sound!":" starts with "+letter[0]+"!"):"Almost—listen again and choose another picture!"):(letterPick?"You picked "+LETTERS.filter(function(x){return x[0]===letterPick})[0][1]+". Press the check when you’re ready!":"Tap each picture to hear its name."))+'</div></div></div>';
     }
-    fun+='</section><section class="fun-card"><div class="fun-head"><h2>💪 Morning workout</h2><span>'+moveCount+'/3</span></div><div class="workout-list">';
-    moves.forEach(function(m){var mk=wk+":"+m[0], mDone=!!workoutDone[mk];fun+='<button class="move'+(mDone?" done":"")+'" data-workout="'+esc(mk)+'" aria-pressed="'+mDone+'"><span class="move-emoji">'+m[1]+'</span><span><strong>'+m[2]+'</strong><small>'+m[3]+'</small></span><span class="move-check" aria-hidden="true"></span></button>'});
-    fun+='</div>'+(moveCount===3?'<p class="workout-cheer">Amazing! Your body is ready! 🌟</p>':'')+'</section>';
+    fun+='</section>';
     var discovery=dailyDiscovery(d),discoveryKey=iso(d),found=!!discovered[discoveryKey];
     fun+='<section class="fun-card discovery-card"><div class="fun-head"><h2>🔎 Today’s discovery</h2></div><span class="discovery-theme">This week: '+esc(discovery.theme.theme)+'</span>';
     if(!found){
@@ -567,7 +567,7 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
       if(upcoming.length){h+='<div class="next-jobs"><h2>Then...</h2>';upcoming.forEach(function(x){h+='<div>'+esc(x.it.emoji)+' '+esc(x.it.title)+'</div>'});h+='</div>'}
     }
     if(total){h+='<div class="job-path" aria-label="Your job path">';tasks.forEach(function(x){h+='<button class="'+(done[x.key]?'done':'')+'" data-say="'+esc(x.it.title)+'" aria-label="'+esc(x.it.title)+(done[x.key]?' done':'')+'">'+esc(x.it.emoji)+'</button>'});h+='</div>'}
-    h+='<div class="next-jobs"><h2>🌟 Learning time</h2><div>Today’s letter is '+letter[0]+' '+letter[0].toLowerCase()+', and there is a new discovery waiting.</div><button class="face-again" data-kid-screen="hello">Let’s learn →</button></div>';
+    h+='<div class="next-jobs"><h2>🌟 Learning time</h2><div>Today’s letter is '+letter[0]+' '+letter[0].toLowerCase()+', and there is a new discovery waiting.</div><button class="learning-link" data-kid-screen="hello">Let’s learn →</button></div>';
     var dens=total<=5?"xl":total<=8?"l":total<=13?"m":"s";
     var slotsUsed=["Morning","Afternoon","Evening","Anytime"].filter(function(s){return tasks.some(function(x){return x.slot===s})});
     if(total&&n===total)h+='<div class="cheer"><span class="big">🎉⭐🎉</span>All done! Great job, Kaiya!</div>';
@@ -809,8 +809,6 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
     if(au&&!au.hasAttribute("data-letter-choice")){ev.stopPropagation();playClip(au.getAttribute("data-audio"),au.getAttribute("data-fallback"));return}
     var ks=t.closest("[data-kid-screen]");
     if(ks&&!sheetOpen){kidScreen=ks.getAttribute("data-kid-screen");save("fp-kid-screen",kidScreen);render();window.scrollTo(0,0);return}
-    var fa=t.closest("[data-face-again]");
-    if(fa&&!sheetOpen){faceIndex=(faceIndex+1)%FACE_PROMPTS.length;save("fp-face-index",faceIndex);render();return}
     var p=t.closest("[data-who]");
     if(p){who=p.getAttribute("data-who");save("fp-who",who);offset=0;ciEdit=false;render();window.scrollTo(0,0);return}
     var nv=t.closest("[data-nav]");
