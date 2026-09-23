@@ -3,13 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Family Portal</title>
+<title>Kaiya's Family Portal</title>
 <meta name="theme-color" content="#9570cf">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Kaiya">
 <link rel="manifest" href="/manifest.webmanifest">
+<link rel="shortcut icon" type="image/png" href="/icons/kaiya-64.png">
+<link rel="icon" type="image/png" sizes="64x64" href="/icons/kaiya-64.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/icons/kaiya-192.png">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+<meta property="og:image" content="/icons/kaiya-512.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fredoka:wght@400;500;600;700&family=Figtree:wght@400;500;600;700;800&family=Caprasimo&display=swap">
 <style>
 :root{
@@ -263,7 +266,7 @@ body[data-mode="kid"] .kid-day[aria-current="true"]{background:var(--grape);colo
 body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
 .week-details{margin-bottom:16px}.week-details summary{cursor:pointer;font-weight:800;color:var(--muted);padding:8px 2px}.week-details .kid-week{margin-top:10px}.all-jobs-toggle{width:100%;border:2px solid var(--line);background:var(--paper);border-radius:20px;padding:14px;font-weight:800;font-size:18px;margin:0 0 16px}
 .section-head{margin:28px 2px 12px;font-size:24px;line-height:1.15}.section-head small{display:block;font:600 15px "Figtree",sans-serif;color:var(--muted);margin-top:3px}
-.activity-grid,.day-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-bottom:18px;align-items:stretch}.activity-grid .card-k,.activity-grid .fun-card,.day-grid .card-k,.day-grid .reward-card{margin:0;min-width:0}.day-grid{grid-template-columns:minmax(0,1.5fr) minmax(260px,.8fr)}.day-grid .strip{max-width:100%}
+.activity-grid,.day-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-bottom:18px;align-items:stretch}.activity-grid .card-k,.activity-grid .fun-card,.day-grid .card-k{margin:0;min-width:0}.day-grid{grid-template-columns:1fr}.day-grid .strip{max-width:100%}
 .up-next{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 18px;padding:12px 16px;background:var(--paper);border:1px solid var(--line);border-radius:20px}.up-next strong{color:var(--muted);margin-right:4px}.up-next span{padding:7px 11px;border-radius:99px;background:var(--bg);font-weight:700}
 .job-hero{display:grid;grid-template-columns:auto 1fr;gap:12px 18px;align-items:center;background:#e9ddf7;border:1px solid #d9c3f1;border-radius:30px;padding:22px;margin:0 0 18px}.job-hero .hero-pic{font-size:72px;line-height:1}.job-hero h2{margin:2px 0;font-size:clamp(28px,5vw,42px)}.job-hero .hero-label{font-weight:800;color:#6b4a9c;text-transform:uppercase;letter-spacing:.09em}.hero-actions{grid-column:1/-1;display:flex;gap:10px}.hero-actions button{flex:1;border:0;border-radius:18px;padding:14px;font-size:20px;font-weight:800;background:var(--paper)}.hero-actions button:last-child{background:var(--leaf);color:#fff}
 @media(max-width:680px){.activity-grid,.day-grid{grid-template-columns:1fr}.job-hero .hero-pic{font-size:58px}.section-head{font-size:22px}.up-next span{font-size:14px}}
@@ -519,6 +522,7 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
     var rewardTitle=isFriday&&goalMet?'Friday surprise! 🎉':goalMet?'Friday surprise unlocked!':weekStars+' of '+reward.goal+' stars this week';
     var rewardText=isFriday&&goalMet?esc(reward.prize):goalMet?'You did it! Come back Friday to reveal it.':Math.max(0,reward.goal-weekStars)+' more '+(reward.goal-weekStars===1?'star':'stars')+' to unlock Friday’s surprise.';
     var rewardCard='<div class="reward-card '+(goalMet?'won':'locked')+'"><div class="reward-star">'+(isFriday&&goalMet?'🎁':'⭐')+'</div><div><h2>'+rewardTitle+'</h2><p>'+rewardText+'</p></div><div class="reward-track"><i style="width:'+rewardPct+'%"></i></div></div>';
+    h+=rewardCard;
 
     // check-in (collapses once it is finished)
     var complete=!!(emo&&c.day!=null), showFull=!complete||ciEdit, ci="";
@@ -587,15 +591,9 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
 
     // jobs: layout adapts to how many there are
     var tasks=regularJobs("daughter",d), bonuses=bonusJobs("daughter",d), n=tasks.filter(function(x){return done[x.key]}).length, total=tasks.length;
-    var next=tasks.filter(function(x){return !done[x.key]})[0];
-    if(next){
-      h+='<div class="job-hero"><span class="hero-pic">'+esc(next.it.emoji)+'</span><div><span class="hero-label">Start with this · '+esc(next.slot)+'</span><h2>'+esc(next.it.title)+'</h2><span>⭐ '+weekStars+' of '+reward.goal+' stars this week</span></div><div class="hero-actions"><button data-say="'+esc(next.it.title)+'">🔊 Hear it</button><button data-key="'+esc(next.key)+'">✓ I did it!</button></div></div>';
-      var upcoming=tasks.filter(function(x){return !done[x.key]&&x.key!==next.key}).slice(0,3);
-      if(upcoming.length){h+='<div class="up-next"><strong>Up next</strong>';upcoming.forEach(function(x){h+='<span>'+esc(x.it.emoji)+' '+esc(x.it.title)+'</span>'});h+='</div>'}
-    }
     h+='<h2 class="section-head">😊 Check in & move<small>How do you feel? Then wake up your body.</small></h2><div class="activity-grid">'+ci+workout+'</div>';
     h+='<h2 class="section-head">🔤 Learn something new<small>A quick letter lesson and a fun discovery.</small></h2>'+fun;
-    h+='<h2 class="section-head">📅 Today & my stars<small>Your plans and the prize you’re working toward.</small></h2><div class="day-grid">'+md+rewardCard+'</div>'+week;
+    h+='<h2 class="section-head">📅 Today<small>Your plans for today and a peek at tomorrow.</small></h2><div class="day-grid">'+md+'</div>'+week;
     var dens=total<=5?"xl":total<=8?"l":total<=13?"m":"s";
     var slotsUsed=["Morning","Afternoon","Evening","Anytime"].filter(function(s){return tasks.some(function(x){return x.slot===s})});
     if(total&&n===total)h+='<div class="cheer"><span class="big">🎉⭐🎉</span>All done! Great job, Kaiya!</div>';
