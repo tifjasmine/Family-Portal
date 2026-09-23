@@ -15,6 +15,7 @@ This setup deliberately uses a simple **Who** single-select instead of linked Pe
 | Days | Multiple select | Sun, Mon, Tue, Wed, Thu, Fri, Sat |
 | Date | Date | Used only for One-time |
 | Time of Day | Multiple select | Morning, Afternoon, Evening |
+| Bonus Stars | Number | Leave blank for a regular 1-star task; use 2 or more to show it under Bonus Stars |
 | Sort Order | Number | Optional ordering, such as 10, 20, 30 |
 | Active | Checkbox | Show the task in the portal |
 
@@ -23,7 +24,10 @@ Examples:
 | Task | Who | Repeat | Days | Date | Time of Day |
 | --- | --- | --- | --- | --- | --- |
 | Brush teeth | Kaiya | Every day | | | Morning, Evening |
+| Help Mommy | Kaiya | Every day | | | |
 | Pack snacks | Mom | One-time | | Sep 24, 2026 | Evening |
+
+For **Help Mommy**, set **Bonus Stars** to `2`. It will appear in Kaiya’s separate bonus section rather than in her regular routine.
 
 ## 2. Calendar
 

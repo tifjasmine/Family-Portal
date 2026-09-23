@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Family Portal</title>
+<meta name="theme-color" content="#9570cf">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Kaiya">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/kaiya-192.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fredoka:wght@400;500;600;700&family=Figtree:wght@400;500;600;700;800&family=Caprasimo&display=swap">
 <style>
 :root{
@@ -60,6 +66,8 @@ body[data-mode="adult"] .person[aria-pressed="true"]{border-color:var(--grape)}
 .reward-card{background:linear-gradient(135deg,#6b4eff,#8e72ff);color:#fff;border-radius:28px;padding:16px 18px;margin:0 0 20px;display:grid;grid-template-columns:auto 1fr;gap:12px 16px;align-items:center}
 .reward-star{font-size:58px;line-height:1}.reward-card h2{margin:0;font-size:23px}.reward-card p{margin:2px 0 0;font-size:17px}.reward-track{grid-column:1/-1;height:14px;border-radius:99px;background:rgba(255,255,255,.3);overflow:hidden}.reward-track i{display:block;height:100%;border-radius:99px;background:var(--sun)}
 .reward-card.won{background:linear-gradient(135deg,#16a34a,#2dbe60);animation:pop .45s ease-out}.reward-card.won .reward-star{font-size:68px}
+.reward-card.locked .reward-star{filter:grayscale(.25)}
+.bonus-card{background:#fff7d7;border:2px solid #efd36d;border-radius:28px;padding:18px;margin:0 0 20px}.bonus-card h2{margin:0 0 4px}.bonus-card>p{margin:0 0 12px;color:var(--muted);font-weight:600}.bonus-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}.bonus-task{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;border:2px solid #ead58b;background:var(--paper);border-radius:20px;padding:12px;text-align:left}.bonus-task .pic{font-size:34px}.bonus-task strong{display:block;font-size:18px}.bonus-task b{color:#8b6512;white-space:nowrap}.bonus-task.done{background:var(--leaf-soft);border-color:var(--leaf);opacity:.75}
 .nav{display:flex;gap:8px}
 .nav button{border:1px solid var(--line);background:var(--paper);border-radius:12px;padding:9px 16px;font-weight:500;font-size:16px}
 
@@ -351,8 +359,8 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
   var collapsed=load("fp-collapsed",{});
   var workoutDone=load("fp-workout",{}), lessonOpen=false, letterPick="", letterSubmitted=false;
   var discovered=load("fp-discovered",{});
-  var reward=load("fp-reward",{stars:0,goal:20,prize:"Choose a special treat!"});
-  reward.stars=Math.max(0,+reward.stars||0);reward.goal=Math.max(1,+reward.goal||20);reward.prize=reward.prize||"Choose a special treat!";
+  var reward=load("fp-reward",{goal:20,prize:"Choose a special treat!"});
+  reward.goal=Math.max(1,+reward.goal||20);reward.prize=reward.prize||"Choose a special treat!";
   var showAllJobs=false;
   unlocked=(sessionStorage.getItem("fp-unlock")===state.pin);
   var local=load("fp-local",{});
@@ -432,6 +440,15 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
   }
   function plans(pid,d){return instances(pid,d).filter(function(x){return x.it.type==="plan"})}
   function jobs(pid,d){return instances(pid,d).filter(function(x){return x.it.type!=="plan"})}
+  function starValue(it){return Math.max(1,Math.round(+it.stars||1))}
+  function regularJobs(pid,d){return jobs(pid,d).filter(function(x){return starValue(x.it)===1})}
+  function bonusJobs(pid,d){return jobs(pid,d).filter(function(x){return starValue(x.it)>1})}
+  function mondayOf(d){var x=new Date(d);x.setHours(12,0,0,0);x.setDate(x.getDate()-((x.getDay()+6)%7));return x}
+  function weeklyStars(d){
+    var start=mondayOf(d),end=new Date(start);end.setDate(start.getDate()+7);var total=0;
+    Object.keys(done).forEach(function(key){if(!done[key])return;var p=key.split(":");if(p.length<4)return;var kd=new Date(p[1]+"T12:00:00");if(kd<start||kd>=end)return;var it=items().filter(function(v){return v.id===p[2]})[0];if(it&&(it.who||[]).indexOf("daughter")>-1)total+=starValue(it)});
+    return total;
+  }
   function isKaiyaKey(key){
     var parts=String(key).split(":");if(parts.length<4)return false;
     return items().some(function(it){return it.id===parts[2]&&(it.who||[]).indexOf("daughter")>-1});
@@ -497,8 +514,10 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
       week+='<button class="kid-day" data-goto="'+woff+'" aria-current="'+(iso(wd)===iso(d))+'">'+DOW[wi]+'<b>'+wd.getDate()+'</b><span>'+wplans.map(function(x){return x.it.emoji}).join('')+'</span></button>';
     }
     week+='</div></details>';
-    var rewardWon=reward.stars>=reward.goal,rewardPct=Math.min(100,Math.round(100*reward.stars/reward.goal));
-    var rewardCard='<div class="reward-card'+(rewardWon?' won':'')+'"><div class="reward-star">'+(rewardWon?'🏆':'⭐')+'</div><div><h2>'+(rewardWon?'You earned your prize!':reward.stars+' of '+reward.goal+' stars')+'</h2><p>'+(rewardWon?esc(reward.prize):'Keep going! Your prize is: '+esc(reward.prize))+'</p></div><div class="reward-track"><i style="width:'+rewardPct+'%"></i></div></div>';
+    var weekStars=weeklyStars(d),goalMet=weekStars>=reward.goal,isFriday=d.getDay()===5,rewardPct=Math.min(100,Math.round(100*weekStars/reward.goal));
+    var rewardTitle=isFriday&&goalMet?'Friday surprise! 🎉':goalMet?'Friday surprise unlocked!':weekStars+' of '+reward.goal+' stars this week';
+    var rewardText=isFriday&&goalMet?esc(reward.prize):goalMet?'You did it! Come back Friday to reveal it.':Math.max(0,reward.goal-weekStars)+' more '+(reward.goal-weekStars===1?'star':'stars')+' to unlock Friday’s surprise.';
+    var rewardCard='<div class="reward-card '+(goalMet?'won':'locked')+'"><div class="reward-star">'+(isFriday&&goalMet?'🎁':'⭐')+'</div><div><h2>'+rewardTitle+'</h2><p>'+rewardText+'</p></div><div class="reward-track"><i style="width:'+rewardPct+'%"></i></div></div>';
 
     // check-in (collapses once it is finished)
     var complete=!!(emo&&c.day!=null), showFull=!complete||ciEdit, ci="";
@@ -559,21 +578,22 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
     var discovery=dailyDiscovery(d),discoveryKey=iso(d),found=!!discovered[discoveryKey];
     fun+='<section class="fun-card discovery-card"><div class="fun-head"><h2>🔎 Today’s discovery</h2></div><span class="discovery-theme">This week: '+esc(discovery.theme.theme)+'</span>';
     if(!found){
-      fun+='<button class="discovery-surprise" data-discover="1"><span class="big">🎁</span>Tap to reveal today’s surprise!</button>';
+      fun+='<button class="discovery-surprise" data-discover="1"><span class="big">🔎</span>Tap to learn today’s fun fact!</button>';
     } else {
       fun+='<div class="discovery-content"><span class="big">'+esc(discovery.entry.emoji)+'</span><strong>Did you know?</strong><div>'+esc(discovery.entry.fact)+'</div><div class="discovery-try"><strong>🌟 Try it!</strong>'+esc(discovery.entry.try)+'</div><div class="discovery-actions"><button class="sound-btn" data-audio="audio/discoveries/'+discovery.theme.key+'-'+discovery.day+'.mp3" data-fallback="'+esc(discovery.entry.fact+' '+discovery.entry.try)+'">🔊 Tell me!</button></div></div>';
     }
     fun+='</section></div>';
 
     // jobs: layout adapts to how many there are
-    var tasks=jobs("daughter",d), n=tasks.filter(function(x){return done[x.key]}).length, total=tasks.length;
+    var tasks=regularJobs("daughter",d), bonuses=bonusJobs("daughter",d), n=tasks.filter(function(x){return done[x.key]}).length, total=tasks.length;
     var next=tasks.filter(function(x){return !done[x.key]})[0];
     if(next){
-      h+='<div class="job-hero"><span class="hero-pic">'+esc(next.it.emoji)+'</span><div><span class="hero-label">Start with this · '+esc(next.slot)+'</span><h2>'+esc(next.it.title)+'</h2><span>⭐ '+reward.stars+' of '+reward.goal+' stars</span></div><div class="hero-actions"><button data-say="'+esc(next.it.title)+'">🔊 Hear it</button><button data-key="'+esc(next.key)+'">✓ I did it!</button></div></div>';
+      h+='<div class="job-hero"><span class="hero-pic">'+esc(next.it.emoji)+'</span><div><span class="hero-label">Start with this · '+esc(next.slot)+'</span><h2>'+esc(next.it.title)+'</h2><span>⭐ '+weekStars+' of '+reward.goal+' stars this week</span></div><div class="hero-actions"><button data-say="'+esc(next.it.title)+'">🔊 Hear it</button><button data-key="'+esc(next.key)+'">✓ I did it!</button></div></div>';
       var upcoming=tasks.filter(function(x){return !done[x.key]&&x.key!==next.key}).slice(0,3);
       if(upcoming.length){h+='<div class="up-next"><strong>Up next</strong>';upcoming.forEach(function(x){h+='<span>'+esc(x.it.emoji)+' '+esc(x.it.title)+'</span>'});h+='</div>'}
     }
     h+='<h2 class="section-head">😊 Check in & move<small>How do you feel? Then wake up your body.</small></h2><div class="activity-grid">'+ci+workout+'</div>';
+    if(bonuses.length){h+='<section class="bonus-card"><h2>✨ Bonus stars</h2><p>Want to help a little extra?</p><div class="bonus-list">';bonuses.forEach(function(x){h+='<button class="bonus-task'+(done[x.key]?' done':'')+'" data-key="'+esc(x.key)+'" aria-pressed="'+!!done[x.key]+'"><span class="pic">'+esc(x.it.emoji)+'</span><span><strong>'+esc(x.it.title)+'</strong><small>'+esc(x.slot)+'</small></span><b>+'+starValue(x.it)+' ⭐</b></button>'});h+='</div></section>'}
     h+='<h2 class="section-head">🔤 Learn something new<small>A quick letter lesson and a fun discovery.</small></h2>'+fun;
     h+='<h2 class="section-head">📅 Today & my stars<small>Your plans and the prize you’re working toward.</small></h2><div class="day-grid">'+md+rewardCard+'</div>'+week;
     var dens=total<=5?"xl":total<=8?"l":total<=13?"m":"s";
@@ -724,6 +744,7 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
       h+='<label>Who</label><select id="f-who">';
       PEOPLE.forEach(function(p){h+='<option value="'+p.id+'"'+(((it.who||[])[0]||who)===p.id?' selected':'')+'>'+p.name+'</option>'});
       h+='</select><label>Goes on</label><select id="f-type"><option value="task"'+(it.type!=="plan"?' selected':'')+'>Tasks — can be checked off</option><option value="plan"'+(it.type==="plan"?' selected':'')+'>Calendar / My Day</option></select>';
+      if(it.type!=="plan")h+='<label>Stars (use 2 or more for a bonus task)</label><input type="text" id="f-stars" inputmode="numeric" value="'+starValue(it)+'">';
       h+='<label>One-time or recurring?</label><select id="f-kind"><option value="daily"'+(r.kind==="daily"?" selected":"")+'>Recurring — every day</option><option value="days"'+(r.kind==="days"?" selected":"")+'>Recurring — selected weekdays</option><option value="date"'+(r.kind==="date"?" selected":"")+'>One-time — selected date</option></select>';
       if(r.kind==="days"){h+='<label>Which days</label><div class="chips">';DOW.forEach(function(nm,i){h+='<button class="chip" data-f="day" data-v="'+i+'" aria-pressed="'+((r.days||[]).indexOf(i)>-1)+'">'+nm+'</button>'});h+='</div>'}
       if(r.kind==="date")h+='<label>Date</label><input type="date" id="f-date" value="'+esc(r.date||iso(viewDate()))+'">';
@@ -737,11 +758,11 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
       h+='<p class="msg" style="margin:0 0 6px">Changes are saved privately in this browser on this device.</p>';
       items().forEach(function(it){
         var names=(it.who||[]).map(function(id){return id==="daughter"?"Kaiya":id==="mom"?"Mom":"Dad"}).join(", ");
-        h+='<div class="row"><span style="font-size:28px">'+((it.who||[]).indexOf("daughter")>-1?esc(it.emoji):"")+'</span><div class="t">'+esc(it.title)+'<small>'+(it.type==="plan"?"Schedule":"Task")+' · '+esc(repeatText(it))+((it.slots&&it.slots.length)?" · "+it.slots.join(" + "):"")+' · '+names+'</small></div>'
+        h+='<div class="row"><span style="font-size:28px">'+((it.who||[]).indexOf("daughter")>-1?esc(it.emoji):"")+'</span><div class="t">'+esc(it.title)+'<small>'+(it.type==="plan"?"Schedule":"Task")+(it.type!=="plan"?' · '+starValue(it)+' ⭐':'')+' · '+esc(repeatText(it))+((it.slots&&it.slots.length)?" · "+it.slots.join(" + "):"")+' · '+names+'</small></div>'
           +'<button class="btn" data-act="edit" data-id="'+esc(it.id)+'">Edit</button></div>';
       });
       h+='<div class="form"><label>Portal passcode</label><p class="msg">The passcode is 123. It stays locked until entered in each browser session.</p></div>';
-      h+='<div class="form"><label>Stars needed for Kaiya’s prize</label><input type="text" id="f-reward-goal" inputmode="numeric" value="'+reward.goal+'"><label>Prize</label><input type="text" id="f-reward-prize" value="'+esc(reward.prize)+'"><div class="actions"><button class="btn main" data-act="save-reward">Save reward</button>'+(reward.stars>=reward.goal?'<button class="btn" data-act="redeem-reward">Prize given — start next goal</button>':'')+'</div><p class="msg">Kaiya currently has '+reward.stars+' stars.</p></div>';
+      h+='<div class="form"><label>Stars needed to unlock Friday’s surprise</label><input type="text" id="f-reward-goal" inputmode="numeric" value="'+reward.goal+'"><label>Friday surprise</label><input type="text" id="f-reward-prize" value="'+esc(reward.prize)+'"><div class="actions"><button class="btn main" data-act="save-reward">Save Friday reward</button></div><p class="msg">Kaiya has '+weeklyStars(new Date())+' stars this week. The count resets automatically each Monday.</p></div>';
       h+='<div class="actions"><button class="btn main" data-act="add-task">Add task</button><button class="btn main" data-act="add-plan">Add calendar item</button>'
         +'<button class="btn" data-act="lock">Lock now</button><button class="btn" data-act="reset-today">Uncheck today</button><button class="btn" data-act="close">Close</button></div>';
     }
@@ -750,11 +771,12 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
   }
   function readForm(){
     if(!editing)return;
-    var e=document.getElementById("f-emoji"),t=document.getElementById("f-title"),k=document.getElementById("f-kind"),dt=document.getElementById("f-date"),fw=document.getElementById("f-who"),ft=document.getElementById("f-type");
+    var e=document.getElementById("f-emoji"),t=document.getElementById("f-title"),k=document.getElementById("f-kind"),dt=document.getElementById("f-date"),fw=document.getElementById("f-who"),ft=document.getElementById("f-type"),fs=document.getElementById("f-stars");
     if(e)editing.emoji=e.value.trim()||"⭐";
     if(t)editing.title=t.value;
     if(fw)editing.who=[fw.value];
     if(ft)editing.type=ft.value;
+    if(fs)editing.stars=Math.max(1,parseInt(fs.value,10)||1);
     if(k){
       var kind=k.value, r=editing.repeat||{};
       if(kind!==r.kind){editing.repeat=kind==="days"?{kind:"days",days:[1,2,3,4,5]}:kind==="date"?{kind:"date",date:iso(viewDate())}:{kind:"daily"}}
@@ -855,8 +877,8 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
     var tile=t.closest("[data-key]");
     if(tile&&!sheetOpen){
       var k=tile.getAttribute("data-key");
-      if(done[k]){delete done[k];if(isKaiyaKey(k))reward.stars=Math.max(0,reward.stars-1)}else{done[k]=1;justDone=k;if(isKaiyaKey(k))reward.stars++}
-      save("fp-done",done);save("fp-reward",reward);render();queueCompletion(k,!!done[k]);return;
+      if(done[k])delete done[k];else{done[k]=1;justDone=k}
+      save("fp-done",done);render();queueCompletion(k,!!done[k]);return;
     }
     var cg=t.closest("[data-collapse]");
     if(cg&&!sheetOpen){
@@ -876,15 +898,12 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
     if(a){
       var act=a.getAttribute("data-act");
       if(act==="close"){sheetOpen=false;editing=null;sheetMsg="";render()}
-      else if(act==="add-task"||act==="add-plan"){editFromList=sheetOpen;sheetOpen=true;confirmDel=false;editing={_new:true,id:"i"+Date.now().toString(36),title:"",emoji:act==="add-plan"?"📅":"⭐",who:[who],type:act==="add-plan"?"plan":"task",repeat:act==="add-plan"?{kind:"date",date:iso(viewDate())}:{kind:"daily"},slots:[]};sheetMsg="";render()}
+      else if(act==="add-task"||act==="add-plan"){editFromList=sheetOpen;sheetOpen=true;confirmDel=false;editing={_new:true,id:"i"+Date.now().toString(36),title:"",emoji:act==="add-plan"?"📅":"⭐",who:[who],type:act==="add-plan"?"plan":"task",stars:1,repeat:act==="add-plan"?{kind:"date",date:iso(viewDate())}:{kind:"daily"},slots:[]};sheetMsg="";render()}
       else if(act==="edit"){editFromList=sheetOpen;sheetOpen=true;confirmDel=false;var eid=a.getAttribute("data-id");editing=JSON.parse(JSON.stringify(items().filter(function(x){return x.id===eid})[0]));sheetMsg="";render()}
       else if(act==="lock"){sessionStorage.removeItem("fp-unlock");unlocked=false;sheetOpen=false;editing=null;pinEntry="";render()}
       else if(act==="save-reward"){
         var rg=Math.max(1,parseInt((document.getElementById("f-reward-goal").value||"20"),10)||20),rp=(document.getElementById("f-reward-prize").value||"").trim();
         reward.goal=rg;reward.prize=rp||"Choose a special treat!";save("fp-reward",reward);sheetMsg="Reward saved.";render();
-      }
-      else if(act==="redeem-reward"){
-        if(reward.stars>=reward.goal)reward.stars-=reward.goal;save("fp-reward",reward);sheetMsg="Prize marked as given. A new goal has started!";render();
       }
       else if(act==="cancel-edit"){editing=null;sheetMsg="";confirmDel=false;if(!editFromList)sheetOpen=false;render()}
       else if(act==="save")saveEdit();
@@ -900,7 +919,7 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
           editing=null;sheetMsg="Deleted on this device.";if(!editFromList){sheetOpen=false;sheetMsg=""}render();
         }
       }
-      else if(act==="reset-today"){var pre="d:"+iso(viewDate())+":";Object.keys(done).forEach(function(k3){if(k3.indexOf(pre)===0){if(isKaiyaKey(k3))reward.stars=Math.max(0,reward.stars-1);delete done[k3];queueCompletion(k3,false)}});delete checkins[iso(viewDate())];save("fp-done",done);save("fp-checkin",checkins);save("fp-reward",reward);sheetOpen=false;render()}
+      else if(act==="reset-today"){var pre="d:"+iso(viewDate())+":";Object.keys(done).forEach(function(k3){if(k3.indexOf(pre)===0){delete done[k3];queueCompletion(k3,false)}});delete checkins[iso(viewDate())];save("fp-done",done);save("fp-checkin",checkins);sheetOpen=false;render()}
       return;
     }
     if(t.id==="sheet"){sheetOpen=false;editing=null;render()}

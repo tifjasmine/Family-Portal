@@ -1,0 +1,13 @@
+{
+  "name": "Kaiya's Family Portal",
+  "short_name": "Kaiya",
+  "description": "Kaiya's daily routines, learning, and weekly rewards.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5ead8",
+  "theme_color": "#9570cf",
+  "icons": [
+    { "src": "/icons/kaiya-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/kaiya-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

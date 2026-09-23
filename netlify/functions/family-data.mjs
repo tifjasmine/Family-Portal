@@ -49,6 +49,7 @@ function item(record, type) {
     repeat: repeat(fields),
     slots: choices(fields["Time of Day"]),
     sort: Number(fields["Sort Order"] || 999),
+    stars: Math.max(1, Number(fields["Bonus Stars"] || 1)),
   };
 }
 
