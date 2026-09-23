@@ -359,8 +359,9 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
   var collapsed=load("fp-collapsed",{});
   var workoutDone=load("fp-workout",{}), lessonOpen=false, letterPick="", letterSubmitted=false;
   var discovered=load("fp-discovered",{});
-  var reward=load("fp-reward",{goal:20,prize:"Choose a special treat!"});
-  reward.goal=Math.max(1,+reward.goal||20);reward.prize=reward.prize||"Choose a special treat!";
+  var reward=load("fp-reward",{goal:50,prize:"Choose a special treat!"});
+  reward.goal=Math.max(1,+reward.goal||50);reward.prize=reward.prize||"Choose a special treat!";
+  if(reward.goal===20){reward.goal=50;save("fp-reward",reward)}
   var showAllJobs=false;
   unlocked=(sessionStorage.getItem("fp-unlock")===state.pin);
   var local=load("fp-local",{});
@@ -593,7 +594,6 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
       if(upcoming.length){h+='<div class="up-next"><strong>Up next</strong>';upcoming.forEach(function(x){h+='<span>'+esc(x.it.emoji)+' '+esc(x.it.title)+'</span>'});h+='</div>'}
     }
     h+='<h2 class="section-head">😊 Check in & move<small>How do you feel? Then wake up your body.</small></h2><div class="activity-grid">'+ci+workout+'</div>';
-    if(bonuses.length){h+='<section class="bonus-card"><h2>✨ Bonus stars</h2><p>Want to help a little extra?</p><div class="bonus-list">';bonuses.forEach(function(x){h+='<button class="bonus-task'+(done[x.key]?' done':'')+'" data-key="'+esc(x.key)+'" aria-pressed="'+!!done[x.key]+'"><span class="pic">'+esc(x.it.emoji)+'</span><span><strong>'+esc(x.it.title)+'</strong><small>'+esc(x.slot)+'</small></span><b>+'+starValue(x.it)+' ⭐</b></button>'});h+='</div></section>'}
     h+='<h2 class="section-head">🔤 Learn something new<small>A quick letter lesson and a fun discovery.</small></h2>'+fun;
     h+='<h2 class="section-head">📅 Today & my stars<small>Your plans and the prize you’re working toward.</small></h2><div class="day-grid">'+md+rewardCard+'</div>'+week;
     var dens=total<=5?"xl":total<=8?"l":total<=13?"m":"s";
@@ -622,6 +622,7 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
     } else if(!total) {
       h+='<div class="empty"><span class="big">🌈</span>Nothing to do. Play time!</div>';
     }
+    if(bonuses.length){h+='<section class="bonus-card"><h2>✨ Bonus stars</h2><p>Finished your regular jobs? Earn a little extra!</p><div class="bonus-list">';bonuses.forEach(function(x){h+='<button class="bonus-task'+(done[x.key]?' done':'')+'" data-key="'+esc(x.key)+'" aria-pressed="'+!!done[x.key]+'"><span class="pic">'+esc(x.it.emoji)+'</span><span><strong>'+esc(x.it.title)+'</strong><small>'+esc(x.slot)+'</small></span><b>+'+starValue(x.it)+' ⭐</b></button>'});h+='</div></section>'}
     return h;
   }
 
@@ -902,7 +903,7 @@ body[data-mode="kid"] .tile{border-color:#e6c88f;box-shadow:0 5px 0 #d9c6a9}
       else if(act==="edit"){editFromList=sheetOpen;sheetOpen=true;confirmDel=false;var eid=a.getAttribute("data-id");editing=JSON.parse(JSON.stringify(items().filter(function(x){return x.id===eid})[0]));sheetMsg="";render()}
       else if(act==="lock"){sessionStorage.removeItem("fp-unlock");unlocked=false;sheetOpen=false;editing=null;pinEntry="";render()}
       else if(act==="save-reward"){
-        var rg=Math.max(1,parseInt((document.getElementById("f-reward-goal").value||"20"),10)||20),rp=(document.getElementById("f-reward-prize").value||"").trim();
+        var rg=Math.max(1,parseInt((document.getElementById("f-reward-goal").value||"50"),10)||50),rp=(document.getElementById("f-reward-prize").value||"").trim();
         reward.goal=rg;reward.prize=rp||"Choose a special treat!";save("fp-reward",reward);sheetMsg="Reward saved.";render();
       }
       else if(act==="cancel-edit"){editing=null;sheetMsg="";confirmDel=false;if(!editFromList)sheetOpen=false;render()}
